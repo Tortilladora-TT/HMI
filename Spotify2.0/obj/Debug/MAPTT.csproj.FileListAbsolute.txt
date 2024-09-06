@@ -1,0 +1,14 @@
+C:\Users\hp\Documents\Spotify2.0\Spotify2.0\bin\Debug\Spotify2.0.exe.config
+C:\Users\hp\Documents\Spotify2.0\Spotify2.0\bin\Debug\Spotify2.0.exe
+C:\Users\hp\Documents\Spotify2.0\Spotify2.0\bin\Debug\Spotify2.0.pdb
+C:\Users\hp\Documents\Spotify2.0\Spotify2.0\obj\Debug\MAPTT.csproj.AssemblyReference.cache
+C:\Users\hp\Documents\Spotify2.0\Spotify2.0\obj\Debug\Spotify2._0.Form1.resources
+C:\Users\hp\Documents\Spotify2.0\Spotify2.0\obj\Debug\Spotify2._0.Form2.resources
+C:\Users\hp\Documents\Spotify2.0\Spotify2.0\obj\Debug\Spotify2._0.Form3.resources
+C:\Users\hp\Documents\Spotify2.0\Spotify2.0\obj\Debug\Spotify2._0.Form4.resources
+C:\Users\hp\Documents\Spotify2.0\Spotify2.0\obj\Debug\Spotify2._0.Form5.resources
+C:\Users\hp\Documents\Spotify2.0\Spotify2.0\obj\Debug\Spotify2._0.Properties.Resources.resources
+C:\Users\hp\Documents\Spotify2.0\Spotify2.0\obj\Debug\MAPTT.csproj.GenerateResource.cache
+C:\Users\hp\Documents\Spotify2.0\Spotify2.0\obj\Debug\MAPTT.csproj.CoreCompileInputs.cache
+C:\Users\hp\Documents\Spotify2.0\Spotify2.0\obj\Debug\Spotify2.0.exe
+C:\Users\hp\Documents\Spotify2.0\Spotify2.0\obj\Debug\Spotify2.0.pdb
