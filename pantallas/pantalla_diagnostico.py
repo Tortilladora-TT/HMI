@@ -72,7 +72,7 @@ class PantallaDiagnostico(QWidget):
         dialog = QDialog(self)
         dialog.setWindowTitle("Verificando Módulo de Compresión y Corte")
         dialog.setModal(True)
-        dialog.setFixedSize(400, 300)
+        dialog.setFixedSize(400, 200)
 
         layout = QVBoxLayout()
         label = QLabel("Verificando sensores...")
@@ -99,11 +99,18 @@ class PantallaDiagnostico(QWidget):
         dialog.exec_()
 
     def coccion(self):
-        dialog = QMessageBox(self)
-        temperatura = "200"
-        dialog.setWindowTitle("Verificando Módulo de Cocción")
-        dialog.setText(f"Temperatura: {temperatura}°C")  # Cambia "200" por la variable con el formato apropiado
-        dialog.setStandardButtons(QMessageBox.Close)
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Verificando Módulo de Dosificación")
+        dialog.setModal(True)
+        dialog.setFixedSize(400, 200)
+
+        layout = QVBoxLayout()
+        temperatura = "200" #Aquí entra el valor de la temperatura por /dev/AMA0
+        label = QLabel(f"Temperatura: {temperatura}°C")
+        label.setFont(QFont("Arial", 14))
+        layout.addWidget(label, alignment=Qt.AlignCenter)
+        dialog.setLayout(layout)
+
         dialog.exec_()
 
     def regresar(self):
