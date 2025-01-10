@@ -91,11 +91,14 @@ class PantallaTortillasDeseadas(QWidget):
         self.input_value.setText("0")
 
     def guardar(self):
-        tortillas = int(self.input_value.text())
-        if tortillas > 90:
+        try:
+            tortillas = int(self.input_value.text())
+            if tortillas > 90:
+                self.input_value.setText("ERROR")
+            else:
+                self.btn_iniciar.setEnabled(True)
+        except ValueError:
             self.input_value.setText("ERROR")
-        else:
-            self.btn_iniciar.setEnabled(True)
 
     def iniciar(self):
         self.parent.setCurrentWidget(self.parent.pantalla_operacion)
