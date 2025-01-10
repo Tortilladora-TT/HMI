@@ -1,8 +1,8 @@
 from PyQt5.QtWidgets import QApplication, QStackedWidget
-from pantalla_principal import PantallaPrincipal
-from pantalla_diagnostico import PantallaDiagnostico
+from pantallas.pantalla_principal import PantallaPrincipal
+from pantallas.pantalla_diagnostico import PantallaDiagnostico
 from PyQt5.QtCore import Qt
-
+from config import cargar_estilos
 
 class MainApp(QStackedWidget):
     def __init__(self):
@@ -29,6 +29,10 @@ if __name__ == "__main__":
     import sys
 
     app = QApplication(sys.argv)
+
+    # Cargar estilos
+    cargar_estilos(app)
+
     main_app = MainApp()
     main_app.show()
     sys.exit(app.exec_())
