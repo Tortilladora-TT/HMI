@@ -45,10 +45,10 @@ class PantallaAutomatico(QWidget):
         self.setLayout(layout)
 
     def masa_disponible(self):
-        print("Seleccionada la opción de Masa Disponible...")
+        self.parent.setCurrentWidget(self.parent.pantalla_masa_disponible)
 
     def tortillas_deseadas(self):
-        print("Seleccionada la opción de Tortillas Deseadas...")
+        self.parent.setCurrentWidget(self.parent.pantalla_tortillas_deseadas)
 
     def regresar(self):
         self.parent.setCurrentWidget(self.parent.pantalla_principal)
