@@ -1,0 +1,13 @@
+QWidget {
+    background-color: #f5f2d0;
+}
+
+QPushButton {
+    font-size: 16px;
+    padding: 10px;
+    border-radius: 15px;
+}
+
+QLabel {
+    color: #333;
+}

@@ -1,0 +1,34 @@
+from PyQt5.QtWidgets import QApplication, QStackedWidget
+from pantalla_principal import PantallaPrincipal
+from pantalla_diagnostico import PantallaDiagnostico
+from PyQt5.QtCore import Qt
+
+
+class MainApp(QStackedWidget):
+    def __init__(self):
+        super().__init__()
+
+        # Inicializar pantallas
+        self.pantalla_principal = PantallaPrincipal(self)
+        self.pantalla_diagnostico = PantallaDiagnostico(self)
+
+        # Agregar pantallas al stack
+        self.addWidget(self.pantalla_principal)
+        self.addWidget(self.pantalla_diagnostico)
+
+        # Configuración de la ventana
+        self.setWindowTitle("HMI - Selección de Modos")
+        self.showFullScreen()  # Inicia en pantalla completa
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Escape:
+            self.close()  # Cerrar la aplicación si presionas Esc
+
+
+if __name__ == "__main__":
+    import sys
+
+    app = QApplication(sys.argv)
+    main_app = MainApp()
+    main_app.show()
+    sys.exit(app.exec_())
