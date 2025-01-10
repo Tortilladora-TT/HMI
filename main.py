@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QApplication, QStackedWidget
 from pantallas.pantalla_principal import PantallaPrincipal
 from pantallas.pantalla_diagnostico import PantallaDiagnostico
+from pantallas.pantalla_automatico import PantallaAutomatico
 from PyQt5.QtCore import Qt
 from config import cargar_estilos
 
@@ -11,10 +12,12 @@ class MainApp(QStackedWidget):
         # Inicializar pantallas
         self.pantalla_principal = PantallaPrincipal(self)
         self.pantalla_diagnostico = PantallaDiagnostico(self)
+        self.pantalla_automatico = PantallaAutomatico(self)
 
         # Agregar pantallas al stack
         self.addWidget(self.pantalla_principal)
         self.addWidget(self.pantalla_diagnostico)
+        self.addWidget(self.pantalla_automatico)
 
         # Configuración de la ventana
         self.setWindowTitle("HMI - Selección de Modos")

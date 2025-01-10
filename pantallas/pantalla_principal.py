@@ -33,7 +33,7 @@ class PantallaPrincipal(QWidget):
         self.setLayout(layout)
 
     def modo_automatico(self):
-        print("Entrando al Modo Automático...")
+        self.parent.setCurrentWidget(self.parent.pantalla_automatico)
 
     def modo_diagnostico(self):
         self.parent.setCurrentWidget(self.parent.pantalla_diagnostico)
