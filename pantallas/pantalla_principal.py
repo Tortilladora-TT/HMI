@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QSpacerItem, QSizePolicy
 from PyQt5.QtCore import Qt
 from utils.base_ui import BaseUI
 
@@ -11,19 +11,31 @@ class PantallaPrincipal(QWidget):
     def init_ui(self):
         # Configuración del layout principal
         layout = QVBoxLayout()
-        layout.setAlignment(Qt.AlignCenter)  # Alinear todos los elementos al centro
-        layout.setContentsMargins(0, 0, 0, 0)  # Sin márgenes adicionales
-        layout.setSpacing(20)  # Espaciado vertical entre elementos
+        layout.setAlignment(Qt.AlignTop)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(20)
 
-        # Encabezado
+        # Título
         layout.addWidget(BaseUI.crear_encabezado("Selección de Modos"))
 
         # Subtítulo
         layout.addWidget(BaseUI.crear_subtitulo("Selecciona el modo de operación deseado"))
 
+        # Espaciador para centrar los botones
+        layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
+
         # Botones principales
-        layout.addWidget(BaseUI.crear_boton("MODO AUTOMÁTICO", self.modo_automatico))
-        layout.addWidget(BaseUI.crear_boton("MODO DIAGNÓSTICO", self.modo_diagnostico))
+        botones_layout = QVBoxLayout()
+        botones_layout.setAlignment(Qt.AlignCenter)
+        botones_layout.setSpacing(15)
+
+        botones_layout.addWidget(BaseUI.crear_boton("MODO AUTOMÁTICO", self.modo_automatico))
+        botones_layout.addWidget(BaseUI.crear_boton("MODO DIAGNÓSTICO", self.modo_diagnostico))
+
+        layout.addLayout(botones_layout)
+
+        # Espaciador para mantener centrado
+        layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
         self.setLayout(layout)
 
