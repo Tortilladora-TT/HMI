@@ -1,0 +1,18 @@
+# Python Bytecode
+*.pyc
+*.pyo
+__pycache__/
+*.pyd
+
+# Logs
+*.log
+*.txt
+hmi_tortilla_machine.log
+
+# Directorios temporales
+.temp
+.cache
+
+# Archivos de configuración locales
+*.env
+*.local
