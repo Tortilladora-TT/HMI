@@ -1,6 +1,6 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QLabel
-from PyQt5.QtGui import QFont
+from PyQt5.QtWidgets import QWidget, QVBoxLayout
 from PyQt5.QtCore import Qt
+from utils.base_ui import BaseUI
 
 class PantallaPrincipal(QWidget):
     def __init__(self, parent):
@@ -9,26 +9,21 @@ class PantallaPrincipal(QWidget):
         self.init_ui()
 
     def init_ui(self):
+        # Configuración del layout principal
         layout = QVBoxLayout()
-        layout.setAlignment(Qt.AlignCenter)
+        layout.setAlignment(Qt.AlignCenter)  # Alinear todos los elementos al centro
+        layout.setContentsMargins(0, 0, 0, 0)  # Sin márgenes adicionales
+        layout.setSpacing(20)  # Espaciado vertical entre elementos
 
-        titulo = QLabel("Selección de Modos")
-        titulo.setFont(QFont("Arial Black", 32))
-        titulo.setAlignment(Qt.AlignCenter)
-        layout.addWidget(titulo)
+        # Encabezado
+        layout.addWidget(BaseUI.crear_encabezado("Selección de Modos"))
 
-        subtitulo = QLabel("Selecciona el modo de operación deseado")
-        subtitulo.setFont(QFont("Arial", 18))
-        subtitulo.setAlignment(Qt.AlignCenter)
-        layout.addWidget(subtitulo)
+        # Subtítulo
+        layout.addWidget(BaseUI.crear_subtitulo("Selecciona el modo de operación deseado"))
 
-        btn_automatico = QPushButton("MODO AUTOMÁTICO")
-        btn_automatico.clicked.connect(self.modo_automatico)
-        layout.addWidget(btn_automatico)
-
-        btn_diagnostico = QPushButton("MODO DIAGNÓSTICO")
-        btn_diagnostico.clicked.connect(self.modo_diagnostico)
-        layout.addWidget(btn_diagnostico)
+        # Botones principales
+        layout.addWidget(BaseUI.crear_boton("MODO AUTOMÁTICO", self.modo_automatico))
+        layout.addWidget(BaseUI.crear_boton("MODO DIAGNÓSTICO", self.modo_diagnostico))
 
         self.setLayout(layout)
 

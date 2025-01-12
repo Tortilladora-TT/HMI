@@ -1,6 +1,6 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QLabel
-from PyQt5.QtGui import QFont
+from PyQt5.QtWidgets import QWidget, QVBoxLayout
 from PyQt5.QtCore import Qt
+from utils.base_ui import BaseUI
 
 class PantallaAutomatico(QWidget):
     def __init__(self, parent):
@@ -9,38 +9,24 @@ class PantallaAutomatico(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        # Configuración del layout
+        # Configuración del layout principal
         layout = QVBoxLayout()
-        layout.setAlignment(Qt.AlignCenter)
+        layout.setAlignment(Qt.AlignCenter)  # Alinear todo al centro
+        layout.setContentsMargins(0, 0, 0, 0)  # Sin márgenes
+        layout.setSpacing(20)  # Espaciado entre elementos
 
-        # Título
-        titulo = QLabel("Modo Automático")
-        titulo.setFont(QFont("Arial Black", 32))
-        titulo.setAlignment(Qt.AlignCenter)
-        layout.addWidget(titulo)
+        # Encabezado
+        layout.addWidget(BaseUI.crear_encabezado("Modo Automático"))
 
         # Subtítulo
-        subtitulo = QLabel("Selecciona la opción según los datos que se van a ingresar")
-        subtitulo.setFont(QFont("Arial", 18))
-        subtitulo.setAlignment(Qt.AlignCenter)
-        layout.addWidget(subtitulo)
+        layout.addWidget(BaseUI.crear_subtitulo("Selecciona la opción según los datos que se van a ingresar"))
 
-        # Botones
-        btn_masa_disponible = QPushButton("Masa Disponible")
-        btn_masa_disponible.setFont(QFont("Arial", 16))
-        btn_masa_disponible.clicked.connect(self.masa_disponible)
-        layout.addWidget(btn_masa_disponible)
-
-        btn_tortillas_deseadas = QPushButton("Tortillas Deseadas")
-        btn_tortillas_deseadas.setFont(QFont("Arial", 16))
-        btn_tortillas_deseadas.clicked.connect(self.tortillas_deseadas)
-        layout.addWidget(btn_tortillas_deseadas)
+        # Botones principales
+        layout.addWidget(BaseUI.crear_boton("Masa Disponible", self.masa_disponible))
+        layout.addWidget(BaseUI.crear_boton("Tortillas Deseadas", self.tortillas_deseadas))
 
         # Botón para regresar
-        btn_regresar = QPushButton("↩️ Regresar")
-        btn_regresar.setFont(QFont("Arial", 16))
-        btn_regresar.clicked.connect(self.regresar)
-        layout.addWidget(btn_regresar)
+        layout.addWidget(BaseUI.crear_boton("↩️ Regresar", self.regresar))
 
         self.setLayout(layout)
 

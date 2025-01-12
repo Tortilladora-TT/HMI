@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QGridLayout
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
 
@@ -7,10 +7,11 @@ class PantallaMasaDisponible(QWidget):
     def __init__(self, parent):
         super().__init__()
         self.parent = parent
+        self.tortillas_calculadas = 0  # Inicializamos el número de tortillas calculadas
         self.init_ui()
 
     def init_ui(self):
-        main_layout = QVBoxLayout()
+        self.main_layout = QVBoxLayout()
 
         # Encabezado
         header_layout = QVBoxLayout()
@@ -27,12 +28,12 @@ class PantallaMasaDisponible(QWidget):
         subtitulo.setFont(QFont("Arial", 14))
         subtitulo.setAlignment(Qt.AlignLeft)
         header_layout.addWidget(subtitulo)
-        main_layout.addLayout(header_layout)
+        self.main_layout.addLayout(header_layout)
 
         # Cuerpo principal
         body_layout = QHBoxLayout()
 
-        # Labels en la izquierda
+        # Labels a la izquierda
         labels_layout = QVBoxLayout()
         self.label_bascula = QLabel("Peso Báscula: 0.0 kg")
         self.label_bascula.setFont(QFont("Arial", 18))
@@ -68,22 +69,41 @@ class PantallaMasaDisponible(QWidget):
         buttons_layout.addWidget(btn_regresar)
 
         body_layout.addLayout(buttons_layout)
-        main_layout.addLayout(body_layout)
+        self.main_layout.addLayout(body_layout)
 
-        self.setLayout(main_layout)
+        self.setLayout(self.main_layout)
+
+    def reset_pantalla(self):
+        """
+        Restaura el estado inicial de la pantalla.
+        """
+        self.label_bascula.setText("Peso Báscula: 0.0 kg")
+        self.label_tortillas.setText("Tortillas Calculadas: 0")
+        self.btn_tarar.setEnabled(True)
+        self.btn_calcular.setEnabled(False)
+        self.btn_iniciar.setEnabled(False)
 
     def tarar_bascula(self):
         self.btn_tarar.setEnabled(False)
         self.btn_calcular.setEnabled(True)
 
     def calcular_tortillas(self):
-        self.label_bascula.setText("Peso Báscula: 2.0 kg")  # Simulación
-        self.label_tortillas.setText("Tortillas Calculadas: 60")  # Simulación
+        # Simulación del cálculo
+        self.label_bascula.setText("Peso Báscula: 2.0 kg")
+        self.tortillas_calculadas = 60  # Simulación
+        self.label_tortillas.setText(f"Tortillas Calculadas: {self.tortillas_calculadas}")
         self.btn_calcular.setEnabled(False)
         self.btn_iniciar.setEnabled(True)
 
     def iniciar(self):
+        """
+        Envía el número de tortillas calculadas a pantalla_operacion y cambia de pantalla.
+        """
+        self.parent.pantalla_operacion.actualizar_tortillas(self.tortillas_calculadas)
         self.parent.setCurrentWidget(self.parent.pantalla_operacion)
 
     def regresar(self):
+        """
+        Regresa a la pantalla principal.
+        """
         self.parent.setCurrentWidget(self.parent.pantalla_automatico)

@@ -1,4 +1,5 @@
-from PyQt5.QtWidgets import QApplication, QStackedWidget
+# main.py
+from PyQt5.QtWidgets import QApplication, QStackedWidget, QMessageBox
 from pantallas.pantalla_principal import PantallaPrincipal
 from pantallas.pantalla_diagnostico import PantallaDiagnostico
 from pantallas.pantalla_automatico import PantallaAutomatico
@@ -6,7 +7,8 @@ from pantallas.pantalla_masa_disponible import PantallaMasaDisponible
 from pantallas.pantalla_tortillas_deseadas import PantallaTortillasDeseadas
 from pantallas.pantalla_operacion import PantallaOperacion
 from PyQt5.QtCore import Qt
-from config import cargar_estilos
+from config import cargar_estilos, configurar_logs
+import logging
 
 class MainApp(QStackedWidget):
     def __init__(self):
@@ -30,14 +32,28 @@ class MainApp(QStackedWidget):
 
         # Configuración de la ventana
         self.setWindowTitle("HMI - Selección de Modos")
+        self.setStyleSheet("QStackedWidget { background-color: #e6f7ff; }")  # Fondo mejorado
         self.showFullScreen()  # Inicia en pantalla completa
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Escape:
-            self.close()  # Cerrar la aplicación si presionas Esc
+            logging.info("Aplicación cerrada por el usuario.")
+            respuesta = QMessageBox.question(
+                self,
+                "Confirmar salida",
+                "¿Está seguro de que desea salir?",
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No
+            )
+            if respuesta == QMessageBox.Yes:
+                self.close()  # Cerrar la aplicación si presionas Esc
 
 if __name__ == "__main__":
     import sys
+
+    # Configurar logs
+    configurar_logs()
+    logging.info("Iniciando la aplicación HMI")
 
     app = QApplication(sys.argv)
 
@@ -46,4 +62,8 @@ if __name__ == "__main__":
 
     main_app = MainApp()
     main_app.show()
-    sys.exit(app.exec_())
+    
+    try:
+        sys.exit(app.exec_())
+    except Exception as e:
+        logging.error(f"Error durante la ejecución de la aplicación: {e}")
