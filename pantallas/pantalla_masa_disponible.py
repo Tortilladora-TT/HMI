@@ -7,16 +7,18 @@ import RPi.GPIO as GPIO
 class SensorThread(QThread):
     peso_actualizado = pyqtSignal(float)
 
-    def __init__(self, hx):
+    def __init__(self, hx, factor_calibracion):
         super().__init__()
         self.hx = hx
+        self.factor_calibracion = factor_calibracion
         self.running = True
 
     def run(self):
         while self.running:
             try:
-                peso = self.hx.get_weight(5) / 1000  # Convertir a kg
-                self.peso_actualizado.emit(round(peso, 3))
+                peso_bruto = self.hx.get_weight(5)  # Lectura cruda del sensor
+                peso_kg = (peso_bruto / self.factor_calibracion) / 1000  # Convertir a kg
+                self.peso_actualizado.emit(round(peso_kg, 3))
                 self.hx.power_down()
                 self.hx.power_up()
                 self.msleep(500)  # Leer cada 500 ms
@@ -37,10 +39,10 @@ class PantallaMasaDisponible(QWidget):
     def init_sensor(self):
         GPIO.setwarnings(False)
         self.hx = HX711(5, 6)  # Pines DT y SCK
-        self.hx.set_reference_unit(283.29)
         self.hx.reset()
-        self.hx.tare()
-        self.sensor_thread = SensorThread(self.hx)
+        self.hx.tare()  # Realiza la tara
+        self.factor_calibracion = 283.29  # Ajusta este valor tras la calibración
+        self.sensor_thread = SensorThread(self.hx, self.factor_calibracion)
         self.sensor_thread.peso_actualizado.connect(self.actualizar_peso)
         self.peso_actual = 0.0
 
@@ -103,31 +105,3 @@ class PantallaMasaDisponible(QWidget):
         buttons_layout.addWidget(btn_regresar)
 
         body_layout.addLayout(buttons_layout)
-        main_layout.addLayout(body_layout)
-
-        self.setLayout(main_layout)
-
-    def tarar_bascula(self):
-        self.hx.tare()
-        self.label_bascula.setText("Peso Báscula: 0.0 kg")
-        self.btn_tarar.setEnabled(False)
-        self.btn_calcular.setEnabled(True)
-        self.sensor_thread.start()
-
-    def calcular_tortillas(self):
-        self.btn_calcular.setEnabled(False)
-        self.btn_iniciar.setEnabled(True)
-        tortillas = int(self.peso_actual / 0.033)  # Suponiendo 33 g por tortilla
-        self.label_tortillas.setText(f"Tortillas Calculadas: {tortillas}")
-
-    def actualizar_peso(self, peso):
-        self.peso_actual = peso
-        self.label_bascula.setText(f"Peso Báscula: {peso} kg")
-
-    def iniciar(self):
-        self.sensor_thread.detener()
-        self.parent.setCurrentWidget(self.parent.pantalla_operacion)
-
-    def regresar(self):
-        self.sensor_thread.detener()
-        self.parent.setCurrentWidget(self.parent.pantalla_automatico)
