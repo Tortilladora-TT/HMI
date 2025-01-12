@@ -14,14 +14,14 @@ class PantallaDiagnostico(QWidget):
         layout.setAlignment(Qt.AlignCenter)
 
         # Título
-        titulo = QLabel("MODO DIAGNÓSTICO")
-        titulo.setFont(QFont("Arial Black", 24))
+        titulo = QLabel("Modo Diagnóstico")
+        titulo.setFont(QFont("Arial Black", 32))
         titulo.setAlignment(Qt.AlignCenter)
         layout.addWidget(titulo)
 
         # Subtítulo
-        subtitulo = QLabel("Selecciona la opción que le gustaría verificar.\nRecuerda: este modo NO NECESITA MASA.")
-        subtitulo.setFont(QFont("Arial", 14))
+        subtitulo = QLabel("Selecciona la opción que le gustaría verificar.\nRecuerda: este modo es SIN MASA")
+        subtitulo.setFont(QFont("Arial", 18))
         subtitulo.setAlignment(Qt.AlignCenter)
         layout.addWidget(subtitulo)
 
@@ -43,7 +43,7 @@ class PantallaDiagnostico(QWidget):
 
         # Botón para regresar
         btn_regresar = QPushButton("↩️ Regresar")
-        btn_regresar.setFont(QFont("Arial", 14))
+        btn_regresar.setFont(QFont("Arial", 16))
         btn_regresar.clicked.connect(self.regresar)
         layout.addWidget(btn_regresar)
 

@@ -38,7 +38,7 @@ class PantallaAutomatico(QWidget):
 
         # Botón para regresar
         btn_regresar = QPushButton("↩️ Regresar")
-        btn_regresar.setFont(QFont("Arial", 14))
+        btn_regresar.setFont(QFont("Arial", 16))
         btn_regresar.clicked.connect(self.regresar)
         layout.addWidget(btn_regresar)
 
