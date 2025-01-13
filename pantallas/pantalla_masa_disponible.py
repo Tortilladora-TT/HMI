@@ -3,8 +3,6 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt, QTimer
 from utils.base_ui import BaseUI
 import RPi.GPIO as GPIO
-import sys
-import time
 from libraries.hx711py.hx711 import HX711
 
 class PantallaMasaDisponible(QWidget):
@@ -14,6 +12,7 @@ class PantallaMasaDisponible(QWidget):
         self.tortillas_calculadas = 0  # Inicializamos el número de tortillas calculadas
         self.hx = None  # Instancia de la báscula
         self.peso_actual = 0.0  # Peso inicial
+        self.timer = QTimer()  # Temporizador para actualizar el peso
         self.init_ui()
 
     def init_ui(self):
@@ -69,19 +68,22 @@ class PantallaMasaDisponible(QWidget):
 
         self.setLayout(layout_principal)
 
-        # Iniciar la actualización continua del peso
-        self.start_peso_update()
-
     def reset_pantalla(self):
-        """Restaura el estado inicial de la pantalla y limpia los GPIO."""
+        """Restaura el estado inicial de la pantalla y limpia los recursos."""
         self.label_bascula.setText("Peso Báscula: 0.0 kg")
         self.label_tortillas.setText("Tortillas Calculadas: 0")
         self.btn_tarar.setEnabled(True)
         self.btn_guardar.setEnabled(False)
         self.btn_iniciar.setEnabled(False)
         self.subtitulo.setText("Presiona el botón tarar para calibrar la báscula.")
+        self.stop_peso_update()
         if self.hx:
-            GPIO.cleanup()  # Limpia los GPIO
+            try:
+                self.hx.power_down()
+                GPIO.cleanup()
+            except Exception as e:
+                print(f"Error al limpiar GPIO: {e}")
+            self.hx = None
 
     def tarar_bascula(self):
         """Configura y realiza la tara de la báscula."""
@@ -93,26 +95,32 @@ class PantallaMasaDisponible(QWidget):
             self.subtitulo.setText("Báscula tarada. Ahora coloca la masa.")
             self.btn_tarar.setEnabled(False)
             self.btn_guardar.setEnabled(True)
+            self.start_peso_update()
         except Exception as e:
             self.subtitulo.setText("Error al tarar la báscula.")
             print(f"Error: {e}")
 
     def start_peso_update(self):
-        """Actualiza el peso de la báscula continuamente en el label."""
+        """Inicia la actualización continua del peso."""
+        self.timer.timeout.connect(self.update_peso)
+        self.timer.start(500)  # Actualiza cada 500ms
+
+    def stop_peso_update(self):
+        """Detiene la actualización continua del peso."""
+        self.timer.stop()
+
+    def update_peso(self):
+        """Obtiene el peso de la báscula y lo actualiza en el label."""
         try:
             if self.hx:
-                self.peso_actual = self.hx.get_weight(5) / 1000  # Obtener peso en kg
-                self.peso_actual = round(self.peso_actual, 3)  # Redondear a 3 decimales
+                self.peso_actual = abs(round(self.hx.get_weight(5) / 1000, 3))  # Solo valores positivos
                 self.label_bascula.setText(f"Peso Báscula: {self.peso_actual} kg")
                 self.label_tortillas.setText(
                     f"Tortillas Calculadas: {int(self.peso_actual * 30)}"
-                )  # Actualiza el cálculo de tortillas
+                )  # Calcula las tortillas dinámicamente
         except Exception as e:
             self.label_bascula.setText("Peso Báscula: Error")
             print(f"Error al leer el peso: {e}")
-
-        # Continuar actualizando cada 500ms
-        QTimer.singleShot(500, self.start_peso_update)
 
     def guardar_peso(self):
         """Guarda el peso actual y habilita el botón iniciar."""
@@ -129,6 +137,6 @@ class PantallaMasaDisponible(QWidget):
         self.parent.cambiar_pantalla(self.parent.pantalla_operacion)
 
     def regresar(self):
-        """Regresa a la pantalla anterior, limpia los GPIO y reinicia el estado."""
+        """Regresa a la pantalla anterior, limpia los recursos y reinicia el estado."""
         self.reset_pantalla()
         self.parent.cambiar_pantalla(self.parent.pantalla_automatico)
