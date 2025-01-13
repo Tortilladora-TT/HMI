@@ -1,14 +1,19 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QGridLayout, QHBoxLayout
 from PyQt5.QtGui import QFont
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QTimer
 from utils.base_ui import BaseUI
-
+import RPi.GPIO as GPIO
+from libraries.hx711py.hx711 import HX711
 
 class PantallaTortillasDeseadas(QWidget):
     def __init__(self, parent):
         super().__init__()
         self.parent = parent
+        self.hx = None  # Instancia de la báscula
+        self.peso_actual = 0.0  # Peso inicial
+        self.tortillas_disponibles = 0  # Tortillas posibles con la masa actual
         self.init_ui()
+        self.timer = QTimer()  # Temporizador para actualizar el peso
 
     def init_ui(self):
         # Configuración del layout principal
@@ -24,7 +29,8 @@ class PantallaTortillasDeseadas(QWidget):
                 "1. Ingresa el número de tortillas.\n"
                 "2. Guarda el valor.\n"
                 "3. Coloca la masa.\n"
-                "4. Presiona Iniciar."
+                "4. Observa la cantidad posible.\n"
+                "5. Presiona Iniciar."
             )
         )
 
@@ -32,15 +38,25 @@ class PantallaTortillasDeseadas(QWidget):
         cuerpo_layout = QHBoxLayout()
         cuerpo_layout.setSpacing(30)
 
-        # Sección izquierda: Display del número de tortillas
+        # Sección izquierda: Displays
         display_layout = QVBoxLayout()
         display_layout.setSpacing(20)
 
+        # Display para tortillas ingresadas
         self.input_value = QLabel("0")
         self.input_value.setFont(QFont("Arial", 24))
         self.input_value.setAlignment(Qt.AlignCenter)
         self.input_value.setStyleSheet("border: 2px solid black; padding: 10px;")
+        display_layout.addWidget(BaseUI.crear_subtitulo("Tortillas Ingresadas"))
         display_layout.addWidget(self.input_value)
+
+        # Display para tortillas disponibles
+        self.available_value = QLabel("0")
+        self.available_value.setFont(QFont("Arial", 24))
+        self.available_value.setAlignment(Qt.AlignCenter)
+        self.available_value.setStyleSheet("border: 2px solid black; padding: 10px;")
+        display_layout.addWidget(BaseUI.crear_subtitulo("Tortillas Posibles"))
+        display_layout.addWidget(self.available_value)
 
         cuerpo_layout.addLayout(display_layout)
 
@@ -82,8 +98,13 @@ class PantallaTortillasDeseadas(QWidget):
     def reset_pantalla(self):
         """Reinicia el valor de las tortillas y desactiva el botón de inicio."""
         self.input_value.setText("0")
+        self.available_value.setText("0")
         self.btn_iniciar.setEnabled(False)
-        
+        self.stop_peso_update()
+        if self.hx:
+            self.hx.power_down()
+            GPIO.cleanup()
+            self.hx = None
 
     def add_digit(self, digit):
         """Añade un dígito al valor actual."""
@@ -98,7 +119,7 @@ class PantallaTortillasDeseadas(QWidget):
         self.input_value.setText("0")
 
     def guardar(self):
-        """Guarda el valor ingresado."""
+        """Guarda el valor ingresado y habilita el botón iniciar."""
         try:
             tortillas = int(self.input_value.text())
             if tortillas < 1 or tortillas > 90:  # Limitamos a 90 tortillas
@@ -106,12 +127,36 @@ class PantallaTortillasDeseadas(QWidget):
                 self.btn_iniciar.setEnabled(False)
             else:
                 self.btn_iniciar.setEnabled(True)
+                self.start_peso_update()  # Inicia la actualización del peso
         except ValueError:
             self.input_value.setText("ERROR")
             self.btn_iniciar.setEnabled(False)
 
+    def start_peso_update(self):
+        """Inicia la actualización continua del peso."""
+        if not self.hx:
+            self.hx = HX711(5, 6)  # Pines DT y SCK
+            self.hx.set_reference_unit(277)
+            self.hx.reset()
+            self.hx.tare()
+        self.timer.timeout.connect(self.update_peso)
+        self.timer.start(500)  # Actualiza cada 500 ms
+
+    def stop_peso_update(self):
+        """Detiene la actualización del peso."""
+        self.timer.stop()
+
+    def update_peso(self):
+        """Actualiza el peso de la báscula y calcula las tortillas posibles."""
+        try:
+            self.peso_actual = abs(round(self.hx.get_weight(5) / 1000, 3))  # Peso en kg
+            self.available_value.setText(str(int(self.peso_actual * 30)))  # Tortillas posibles
+        except Exception as e:
+            print(f"Error al leer el peso: {e}")
+            self.available_value.setText("ERROR")
+
     def iniciar(self):
-        """Envía el valor a pantalla_operacion y cambia de pantalla."""
+        """Envía el valor ingresado a pantalla_operacion y cambia de pantalla."""
         try:
             tortillas = int(self.input_value.text())
             self.parent.pantalla_operacion.actualizar_tortillas(tortillas)
@@ -121,4 +166,5 @@ class PantallaTortillasDeseadas(QWidget):
 
     def regresar(self):
         """Regresa a la pantalla de modo automático."""
+        self.reset_pantalla()
         self.parent.cambiar_pantalla(self.parent.pantalla_automatico)
