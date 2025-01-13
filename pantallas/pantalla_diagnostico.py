@@ -11,32 +11,33 @@ class PantallaDiagnostico(QWidget):
     def init_ui(self):
         # Configuración del layout principal
         layout = QVBoxLayout()
-        layout.setAlignment(Qt.AlignTop)  # Colocamos los elementos desde la parte superior
-        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setContentsMargins(40, 40, 40, 40)  # Márgenes ajustados a 40px
         layout.setSpacing(20)
 
         # Título
         layout.addWidget(BaseUI.crear_encabezado("Modo Diagnóstico"))
 
+        # Espaciador pequeño debajo del título
+        layout.addSpacerItem(QSpacerItem(20, 10, QSizePolicy.Minimum, QSizePolicy.Fixed))
+
         # Subtítulo
         layout.addWidget(BaseUI.crear_subtitulo("Selecciona la opción que le gustaría verificar.\nRecuerda: este modo es SIN MASA"))
 
-        # Espaciador para centrar los botones
+        # Espaciador para centrar los botones principales
         layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
         # Botones principales
-        botones_layout = QVBoxLayout()  # Layout exclusivo para los botones
-        botones_layout.setAlignment(Qt.AlignCenter)  # Aseguramos el centrado de los botones
+        botones_layout = QVBoxLayout()
+        botones_layout.setAlignment(Qt.AlignCenter)
         botones_layout.setSpacing(15)
 
         botones_layout.addWidget(BaseUI.crear_boton("DOSIFICACIÓN", self.dosificacion))
         botones_layout.addWidget(BaseUI.crear_boton("COMPRESIÓN Y CORTE", self.compresion_corte))
         botones_layout.addWidget(BaseUI.crear_boton("COCCIÓN", self.coccion))
 
-        # Añadimos el layout de botones al layout principal
         layout.addLayout(botones_layout)
 
-        # Espaciador para mantener centrado
+        # Espaciador para separar el botón de regresar de los botones principales
         layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
         # Botón para regresar

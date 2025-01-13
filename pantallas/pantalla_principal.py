@@ -11,17 +11,19 @@ class PantallaPrincipal(QWidget):
     def init_ui(self):
         # Configuración del layout principal
         layout = QVBoxLayout()
-        layout.setAlignment(Qt.AlignTop)
-        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setContentsMargins(40, 40, 40, 40)  # Márgenes ajustados a 40px
         layout.setSpacing(20)
 
         # Título
         layout.addWidget(BaseUI.crear_encabezado("Selección de Modos"))
 
+        # Espaciador pequeño debajo del título
+        layout.addSpacerItem(QSpacerItem(20, 10, QSizePolicy.Minimum, QSizePolicy.Fixed))
+
         # Subtítulo
         layout.addWidget(BaseUI.crear_subtitulo("Selecciona el modo de operación deseado"))
 
-        # Espaciador para centrar los botones
+        # Espaciador para centrar los botones principales
         layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
         # Botones principales
@@ -34,7 +36,7 @@ class PantallaPrincipal(QWidget):
 
         layout.addLayout(botones_layout)
 
-        # Espaciador para mantener centrado
+        # Espaciador para separar el botón de regresar de los botones principales
         layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
         self.setLayout(layout)
