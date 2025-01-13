@@ -31,8 +31,8 @@ class PantallaAutomatico(QWidget):
         botones_layout.setAlignment(Qt.AlignCenter)
         botones_layout.setSpacing(15)
 
-        botones_layout.addWidget(BaseUI.crear_boton("Masa Disponible", self.masa_disponible))
-        botones_layout.addWidget(BaseUI.crear_boton("Tortillas Deseadas", self.tortillas_deseadas))
+        botones_layout.addWidget(BaseUI.crear_boton("MASA DISPONIBLE", self.masa_disponible))
+        botones_layout.addWidget(BaseUI.crear_boton("TORTILLAS DESEADAS", self.tortillas_deseadas))
 
         layout.addLayout(botones_layout)
 

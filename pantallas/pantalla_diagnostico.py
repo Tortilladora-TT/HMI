@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QSpacerItem, QSizePolicy, QDialog, QLabel
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QSpacerItem, QSizePolicy
 from PyQt5.QtCore import Qt, QTimer
 from utils.base_ui import BaseUI
 
@@ -11,19 +11,16 @@ class PantallaDiagnostico(QWidget):
     def init_ui(self):
         # Configuración del layout principal
         layout = QVBoxLayout()
-        layout.setContentsMargins(40, 40, 40, 40)  # Márgenes ajustados a 40px
+        layout.setContentsMargins(40, 40, 40, 40)  # Márgenes ajustados
         layout.setSpacing(20)
 
         # Título
         layout.addWidget(BaseUI.crear_encabezado("Modo Diagnóstico"))
 
-        # Espaciador pequeño debajo del título
-        layout.addSpacerItem(QSpacerItem(20, 10, QSizePolicy.Minimum, QSizePolicy.Fixed))
-
         # Subtítulo
         layout.addWidget(BaseUI.crear_subtitulo("Selecciona la opción que le gustaría verificar.\nRecuerda: este modo es SIN MASA"))
 
-        # Espaciador para centrar los botones principales
+        # Espaciador superior para separar el texto de los botones
         layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
         # Botones principales
@@ -31,13 +28,15 @@ class PantallaDiagnostico(QWidget):
         botones_layout.setAlignment(Qt.AlignCenter)
         botones_layout.setSpacing(15)
 
+        # Botones añadidos al layout
         botones_layout.addWidget(BaseUI.crear_boton("DOSIFICACIÓN", self.dosificacion))
         botones_layout.addWidget(BaseUI.crear_boton("COMPRESIÓN Y CORTE", self.compresion_corte))
         botones_layout.addWidget(BaseUI.crear_boton("COCCIÓN", self.coccion))
 
+        # Añadir layout de botones al layout principal
         layout.addLayout(botones_layout)
 
-        # Espaciador para separar el botón de regresar de los botones principales
+        # Espaciador inferior para el botón de regresar
         layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
         # Botón para regresar
@@ -46,36 +45,13 @@ class PantallaDiagnostico(QWidget):
         self.setLayout(layout)
 
     def dosificacion(self):
-        dialog = QDialog(self)
-        dialog.setWindowTitle("Verificando Módulo de Dosificación")
-        dialog.setModal(True)
-        dialog.setFixedSize(400, 200)
-
-        layout = QVBoxLayout()
-        label = QLabel("Esperando datos del módulo...")
-        label.setAlignment(Qt.AlignCenter)
-        layout.addWidget(label)
-        dialog.setLayout(layout)
-
-        timer = QTimer(self)
-        timer.setSingleShot(True)
-        timer.timeout.connect(dialog.accept)
-        timer.start(5000)
-
+        # Usamos BaseUI para crear el alert
+        dialog = BaseUI.crear_alerta(self, "Verificando Módulo de Dosificación", "Esperando datos del módulo...")
+        QTimer.singleShot(5000, dialog.accept)  # Cerrar automáticamente después de 5 segundos
         dialog.exec_()
 
     def compresion_corte(self):
-        dialog = QDialog(self)
-        dialog.setWindowTitle("Verificando Módulo de Compresión y Corte")
-        dialog.setModal(True)
-        dialog.setFixedSize(400, 200)
-
-        layout = QVBoxLayout()
-        label = QLabel("Verificando sensores...")
-        label.setAlignment(Qt.AlignCenter)
-        layout.addWidget(label)
-        dialog.setLayout(layout)
-
+        dialog = BaseUI.crear_alerta(self, "Verificando Módulo de Compresión y Corte", "Verificando sensores...")
         sensor_texts = [
             "Sensor Recepción validado",
             "Sensor Corte 1 validado",
@@ -86,7 +62,7 @@ class PantallaDiagnostico(QWidget):
 
         def update_label(i=0):
             if i < len(sensor_texts):
-                label.setText(sensor_texts[i])
+                dialog.layout().itemAt(0).widget().setText(sensor_texts[i])
                 QTimer.singleShot(3000, lambda: update_label(i + 1))
             else:
                 dialog.accept()
@@ -95,18 +71,9 @@ class PantallaDiagnostico(QWidget):
         dialog.exec_()
 
     def coccion(self):
-        dialog = QDialog(self)
-        dialog.setWindowTitle("Verificando Módulo de Cocción")
-        dialog.setModal(True)
-        dialog.setFixedSize(400, 200)
-
-        layout = QVBoxLayout()
         temperatura = "200"  # Aquí entra el valor de la temperatura
-        label = QLabel(f"Temperatura: {temperatura}°C")
-        label.setAlignment(Qt.AlignCenter)
-        layout.addWidget(label)
-        dialog.setLayout(layout)
-
+        mensaje = f"Temperatura actual: {temperatura}°C"
+        dialog = BaseUI.crear_alerta(self, "Verificando Módulo de Cocción", mensaje)
         dialog.exec_()
 
     def regresar(self):

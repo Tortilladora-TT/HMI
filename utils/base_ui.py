@@ -1,7 +1,8 @@
 # base_ui.py
-from PyQt5.QtWidgets import QLabel, QPushButton
+from PyQt5.QtWidgets import QLabel, QPushButton, QDialog, QVBoxLayout
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
+
 
 class BaseUI:
     @staticmethod
@@ -29,3 +30,24 @@ class BaseUI:
         boton.setFixedWidth(400)          # Más ancho para facilidad de toque
         boton.clicked.connect(funcion)
         return boton
+
+    @staticmethod
+    def crear_alerta(parent, titulo, mensaje, ancho=400, alto=200):
+        """Crea un QDialog estilizado para mostrar alertas."""
+        dialog = QDialog(parent)
+        dialog.setWindowTitle(titulo)
+        dialog.setModal(True)
+        dialog.setFixedSize(ancho, alto)
+
+        layout = QVBoxLayout()
+        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(10)
+
+        # Mensaje principal
+        label = QLabel(mensaje)
+        label.setFont(QFont("Arial", 16))  # Fuente estándar para alertas
+        label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(label)
+
+        dialog.setLayout(layout)
+        return dialog

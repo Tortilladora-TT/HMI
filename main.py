@@ -32,7 +32,7 @@ class MainApp(QStackedWidget):
 
         # Configuración de la ventana
         self.setWindowTitle("HMI - Selección de Modos")
-        self.setStyleSheet("QStackedWidget { background-color: #e6f7ff; }")  # Fondo mejorado
+        self.setStyleSheet("QStackedWidget { background-color: #f5f5f5; }")  # Fondo mejorado
         self.showFullScreen()  # Inicia en pantalla completa
 
     def keyPressEvent(self, event):
