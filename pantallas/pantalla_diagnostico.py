@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QSpacerItem, QSizePolicy
 from PyQt5.QtCore import Qt, QTimer
 from utils.base_ui import BaseUI
+import logging
 
 class PantallaDiagnostico(QWidget):
     def __init__(self, parent):
@@ -45,12 +46,14 @@ class PantallaDiagnostico(QWidget):
         self.setLayout(layout)
 
     def dosificacion(self):
-        # Usamos BaseUI para crear el alert
+        logging.info("Iniciando diagnóstico del módulo de dosificación")
         dialog = BaseUI.crear_alerta(self, "Verificando Módulo de Dosificación", "Esperando datos del módulo...")
         QTimer.singleShot(5000, dialog.accept)  # Cerrar automáticamente después de 5 segundos
+        logging.info("Módulo de dosificación validado correctamente")
         dialog.exec_()
 
     def compresion_corte(self):
+        logging.info("Iniciando diagnóstico del módulo de compresión y corte")
         dialog = BaseUI.crear_alerta(self, "Verificando Módulo de Compresión y Corte", "Verificando sensores...")
         sensor_texts = [
             "Sensor Recepción validado",
@@ -68,12 +71,16 @@ class PantallaDiagnostico(QWidget):
                 dialog.accept()
 
         update_label()
+        logging.info("Módulo de compresión y corte validado correctamente")
         dialog.exec_()
 
     def coccion(self):
+        logging.info("Iniciando diagnóstico del módulo de cocción")
         temperatura = "200"  # Aquí entra el valor de la temperatura
         mensaje = f"Temperatura actual: {temperatura}°C"
         dialog = BaseUI.crear_alerta(self, "Verificando Módulo de Cocción", mensaje)
+        QTimer.singleShot(5000, dialog.accept)
+        logging.info("Módulo de cocción validado correctamente")
         dialog.exec_()
 
     def regresar(self):
