@@ -85,7 +85,7 @@ class PantallaMasaDisponible(QWidget):
         """Configura y realiza la tara de la báscula."""
         try:
             self.hx = HX711(5, 6)  # Pines DT y SCK
-            self.hx.set_reference_unit(283.29)  # Unidad de referencia
+            self.hx.set_reference_unit(277)  # Unidad de referencia
             self.hx.reset()
             self.hx.tare()  # Realiza la tara
             self.label_bascula.setText("Báscula tarada. Coloca la masa.")

@@ -5,7 +5,7 @@ import time
 
 GPIO.setwarnings(False)
 hx = HX711(5, 6)  # Pines DT y SCK
-hx.set_reference_unit(283.29)
+hx.set_reference_unit(1)
 
 print("Tara realizada. Coloca peso en la báscula.")
 while True:
