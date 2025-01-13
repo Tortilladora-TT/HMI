@@ -50,6 +50,7 @@ class PantallaAutomatico(QWidget):
 
     def tortillas_deseadas(self):
         self.parent.setCurrentWidget(self.parent.pantalla_tortillas_deseadas)
+        self.parent.pantalla_tortillas_deseadas.reset_pantalla()
 
     def regresar(self):
         self.parent.setCurrentWidget(self.parent.pantalla_principal)

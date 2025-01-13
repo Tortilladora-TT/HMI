@@ -99,11 +99,15 @@ class PantallaTortillasDeseadas(QWidget):
         """Reinicia el valor de las tortillas y desactiva el botón de inicio."""
         self.input_value.setText("0")
         self.available_value.setText("0")
+        self.available_value.setStyleSheet("border: 2px solid black; padding: 10px; color: black;")
         self.btn_iniciar.setEnabled(False)
         self.stop_peso_update()
         if self.hx:
-            self.hx.power_down()
-            GPIO.cleanup()
+            try:
+                self.hx.power_down()
+                GPIO.cleanup()
+            except Exception as e:
+                print(f"Error al limpiar GPIO: {e}")
             self.hx = None
 
     def add_digit(self, digit):
@@ -150,10 +154,19 @@ class PantallaTortillasDeseadas(QWidget):
         """Actualiza el peso de la báscula y calcula las tortillas posibles."""
         try:
             self.peso_actual = abs(round(self.hx.get_weight(5) / 1000, 3))  # Peso en kg
-            self.available_value.setText(str(int(self.peso_actual * 30)))  # Tortillas posibles
+            self.tortillas_disponibles = int(self.peso_actual * 30)  # Tortillas posibles
+            self.available_value.setText(str(self.tortillas_disponibles))
+
+            # Cambiar el color según las condiciones
+            tortillas_ingresadas = int(self.input_value.text())
+            if self.tortillas_disponibles < tortillas_ingresadas:
+                self.available_value.setStyleSheet("border: 2px solid black; padding: 10px; color: red;")
+            else:
+                self.available_value.setStyleSheet("border: 2px solid black; padding: 10px; color: green;")
         except Exception as e:
             print(f"Error al leer el peso: {e}")
             self.available_value.setText("ERROR")
+            self.available_value.setStyleSheet("border: 2px solid black; padding: 10px; color: black;")
 
     def iniciar(self):
         """Envía el valor ingresado a pantalla_operacion y cambia de pantalla."""
