@@ -46,6 +46,7 @@ class PantallaAutomatico(QWidget):
 
     def masa_disponible(self):
         self.parent.setCurrentWidget(self.parent.pantalla_masa_disponible)
+        self.parent.pantalla_masa_disponible.reset_pantalla()
 
     def tortillas_deseadas(self):
         self.parent.setCurrentWidget(self.parent.pantalla_tortillas_deseadas)
