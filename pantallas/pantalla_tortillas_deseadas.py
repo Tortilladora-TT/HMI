@@ -1,123 +1,118 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QProgressBar, QHBoxLayout
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QGridLayout, QHBoxLayout
 from PyQt5.QtGui import QFont
-from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtCore import Qt
 from utils.base_ui import BaseUI
 
 
-class PantallaOperacion(QWidget):
+class PantallaTortillasDeseadas(QWidget):
     def __init__(self, parent):
         super().__init__()
         self.parent = parent
-        self.total_tortillas = 0  # Total de tortillas deseadas
-        self.tortillas_producidas = 0  # Tortillas producidas
-        self.proceso_pausado = False
-        self.timer = QTimer()  # Temporizador para simular la producción
-        self.timer.timeout.connect(self.incrementar_produccion)  # Llama a incrementar_produccion cada vez que se activa
         self.init_ui()
 
     def init_ui(self):
-        # Layout principal
+        # Configuración del layout principal
         layout_principal = QVBoxLayout()
         layout_principal.setContentsMargins(40, 40, 40, 40)
         layout_principal.setSpacing(20)
 
         # Encabezado
-        layout_principal.addWidget(BaseUI.crear_encabezado("Operación en Proceso"))
+        layout_principal.addWidget(BaseUI.crear_encabezado("Tortillas Deseadas"))
+        layout_principal.addWidget(
+            BaseUI.crear_subtitulo(
+                "Instrucciones:\n"
+                "1. Ingresa el número de tortillas.\n"
+                "2. Guarda el valor.\n"
+                "3. Coloca la masa.\n"
+                "4. Presiona Iniciar."
+            )
+        )
 
-        # Indicador de progreso
-        self.tortillas_label = QLabel("Tortillas producidas: 0 / 0")
-        self.tortillas_label.setFont(QFont("Arial", 18))
-        self.tortillas_label.setAlignment(Qt.AlignCenter)
-        layout_principal.addWidget(self.tortillas_label)
+        # Cuerpo principal
+        cuerpo_layout = QHBoxLayout()
+        cuerpo_layout.setSpacing(30)
 
-        # Barra de progreso personalizada
-        self.progress_bar = QProgressBar()
-        self.progress_bar.setValue(0)
-        self.progress_bar.setMaximum(100)
-        self.progress_bar.setTextVisible(False)  # Eliminar texto del porcentaje
-        layout_principal.addWidget(self.progress_bar)
+        # Sección izquierda: Display del número de tortillas
+        display_layout = QVBoxLayout()
+        display_layout.setSpacing(20)
 
-        # Botones de control
-        self.botones_layout = QHBoxLayout()
-        self.botones_layout.setSpacing(20)
+        self.input_value = QLabel("0")
+        self.input_value.setFont(QFont("Arial", 24))
+        self.input_value.setAlignment(Qt.AlignCenter)
+        self.input_value.setStyleSheet("border: 2px solid black; padding: 10px;")
+        display_layout.addWidget(self.input_value)
 
-        self.btn_pausar = BaseUI.crear_boton("Pausar", self.toggle_pausa)
-        self.botones_layout.addWidget(self.btn_pausar)
+        cuerpo_layout.addLayout(display_layout)
 
-        self.btn_cancelar = BaseUI.crear_boton("Cancelar", self.cancelar)
-        self.botones_layout.addWidget(self.btn_cancelar)
+        # Sección central: Teclado numérico
+        teclado_layout = QGridLayout()
+        teclado_layout.setSpacing(10)
 
-        layout_principal.addLayout(self.botones_layout)
+        for i in range(1, 10):
+            boton = BaseUI.crear_boton_numerico(str(i), lambda _, num=i: self.add_digit(num))
+            teclado_layout.addWidget(boton, (i - 1) // 3, (i - 1) % 3)
+
+        btn_clear = BaseUI.crear_boton_numerico("C", self.clear_input)
+        teclado_layout.addWidget(btn_clear, 3, 0)
+
+        btn_zero = BaseUI.crear_boton_numerico("0", lambda: self.add_digit(0))
+        teclado_layout.addWidget(btn_zero, 3, 1)
+
+        cuerpo_layout.addLayout(teclado_layout)
+
+        # Sección derecha: Botones funcionales
+        botones_layout = QVBoxLayout()
+        botones_layout.setSpacing(20)
+
+        btn_guardar = BaseUI.crear_boton("Guardar", self.guardar)
+        botones_layout.addWidget(btn_guardar)
+
+        self.btn_iniciar = BaseUI.crear_boton("Iniciar", self.iniciar)
+        self.btn_iniciar.setEnabled(False)
+        botones_layout.addWidget(self.btn_iniciar)
+
+        btn_regresar = BaseUI.crear_boton("↩️ Regresar", self.regresar)
+        botones_layout.addWidget(btn_regresar)
+
+        cuerpo_layout.addLayout(botones_layout)
+        layout_principal.addLayout(cuerpo_layout)
 
         self.setLayout(layout_principal)
 
-    def actualizar_tortillas(self, cantidad):
-        """
-        Actualiza el total de tortillas deseadas y reinicia el estado.
-        """
-        self.total_tortillas = cantidad
-        self.tortillas_producidas = 0
-        self.tortillas_label.setText(f"Tortillas producidas: 0 / {self.total_tortillas}")
-        self.progress_bar.setValue(0)
-        self.btn_pausar.setText("Pausar")
-        self.btn_cancelar.setText("Cancelar")
-        self.btn_cancelar.clicked.disconnect()  # Elimina la señal anterior
-        self.btn_cancelar.clicked.connect(self.cancelar)  # Vuelve a conectar con "Cancelar"
-        self.proceso_pausado = False
-        self.timer.start(1000)  # Inicia el temporizador con intervalos de 1 segundo
-
-    def incrementar_produccion(self):
-        """
-        Incrementa el conteo de tortillas producidas y actualiza la pantalla.
-        Este método se llama periódicamente por el QTimer.
-        """
-        if not self.proceso_pausado and self.tortillas_producidas < self.total_tortillas:
-            self.tortillas_producidas += 1
-            progreso = int((self.tortillas_producidas / self.total_tortillas) * 100)
-            self.tortillas_label.setText(
-                f"Tortillas producidas: {self.tortillas_producidas} / {self.total_tortillas}"
-            )
-            self.progress_bar.setValue(progreso)
-
-        if self.tortillas_producidas >= self.total_tortillas:
-            self.finalizar_proceso()
-
-    def finalizar_proceso(self):
-        """
-        Cambia la pantalla a modo 'Proceso terminado' y actualiza los botones.
-        """
-        self.timer.stop()  # Detiene el temporizador
-        self.tortillas_label.setText("Proceso terminado")
-        self.progress_bar.setValue(100)
-
-        # Cambiar el botón "Cancelar" a "Finalizar"
-        self.btn_cancelar.setText("Finalizar")
-        self.btn_cancelar.clicked.disconnect()  # Desconectar señal anterior
-        self.btn_cancelar.clicked.connect(self.finalizar)
-
-        # Deshabilitar el botón "Pausar"
-        self.btn_pausar.setEnabled(False)
-
-    def toggle_pausa(self):
-        """
-        Pausa o reanuda el proceso según el estado actual.
-        """
-        if self.proceso_pausado:
-            self.proceso_pausado = False
-            self.btn_pausar.setText("Pausar")
+    def add_digit(self, digit):
+        """Añade un dígito al valor actual."""
+        current = self.input_value.text()
+        if current == "0" or current == "ERROR":
+            self.input_value.setText(str(digit))
         else:
-            self.proceso_pausado = True
-            self.btn_pausar.setText("Reanudar")
+            self.input_value.setText(current + str(digit))
 
-    def cancelar(self):
-        """
-        Cancela el proceso y regresa al menú principal.
-        """
-        self.timer.stop()  # Detiene el temporizador
-        self.parent.cambiar_pantalla(self.parent.pantalla_principal)
+    def clear_input(self):
+        """Limpia el valor actual."""
+        self.input_value.setText("0")
 
-    def finalizar(self):
-        """
-        Finaliza el proceso y regresa al menú principal.
-        """
-        self.parent.cambiar_pantalla(self.parent.pantalla_principal)
+    def guardar(self):
+        """Guarda el valor ingresado."""
+        try:
+            tortillas = int(self.input_value.text())
+            if tortillas > 90:  # Limitamos a 90 tortillas
+                self.input_value.setText("ERROR")
+                self.btn_iniciar.setEnabled(False)
+            else:
+                self.btn_iniciar.setEnabled(True)
+        except ValueError:
+            self.input_value.setText("ERROR")
+            self.btn_iniciar.setEnabled(False)
+
+    def iniciar(self):
+        """Envía el valor a pantalla_operacion y cambia de pantalla."""
+        try:
+            tortillas = int(self.input_value.text())
+            self.parent.pantalla_operacion.actualizar_tortillas(tortillas)
+            self.parent.cambiar_pantalla(self.parent.pantalla_operacion)
+        except ValueError:
+            self.input_value.setText("ERROR")
+
+    def regresar(self):
+        """Regresa a la pantalla de modo automático."""
+        self.parent.cambiar_pantalla(self.parent.pantalla_automatico)
