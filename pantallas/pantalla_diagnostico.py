@@ -2,12 +2,16 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QSpacerItem, QSizePolicy
 from PyQt5.QtCore import Qt, QTimer
 from utils.base_ui import BaseUI
 import logging
+import serial
+import time
 
 class PantallaDiagnostico(QWidget):
     def __init__(self, parent):
         super().__init__()
         self.parent = parent
+        self.arduino = None  # Instancia del puerto serial
         self.init_ui()
+        self.connect_serial()
 
     def init_ui(self):
         # Configuración del layout principal
@@ -45,6 +49,16 @@ class PantallaDiagnostico(QWidget):
 
         self.setLayout(layout)
 
+    def connect_serial(self):
+        """Conecta al puerto serial del Arduino."""
+        try:
+            self.arduino = serial.Serial(port='/dev/ttyUSB1', baudrate=9600, timeout=1)  # Ajusta el puerto según sea necesario
+            time.sleep(2)  # Esperar a que el Arduino se reinicie
+            logging.info("Conexión exitosa con el Arduino")
+        except Exception as e:
+            logging.error(f"Error al conectar con el Arduino: {e}")
+            self.arduino = None
+
     def dosificacion(self):
         logging.info("Iniciando diagnóstico del módulo de dosificación")
         dialog = BaseUI.crear_alerta(self, "Verificando Módulo de Dosificación", "Esperando datos del módulo...")
@@ -54,24 +68,62 @@ class PantallaDiagnostico(QWidget):
 
     def compresion_corte(self):
         logging.info("Iniciando diagnóstico del módulo de compresión y corte")
-        dialog = BaseUI.crear_alerta(self, "Verificando Módulo de Compresión y Corte", "Verificando sensores...")
-        sensor_texts = [
-            "Sensor Recepción validado",
-            "Sensor Corte 1 validado",
-            "Sensor Corte 2 validado",
-            "Sensor Compresión validado",
-            "Sensor Expulsión validado",
-        ]
 
-        def update_label(i=0):
-            if i < len(sensor_texts):
-                dialog.layout().itemAt(0).widget().setText(sensor_texts[i])
-                QTimer.singleShot(3000, lambda: update_label(i + 1))
-            else:
-                dialog.accept()
+        if not self.arduino:
+            logging.error("El Arduino no está conectado. Verifica la conexión.")
+            dialog = BaseUI.crear_alerta(self, "Error", "No se detectó conexión con el Arduino.")
+            dialog.exec_()
+            return
 
-        update_label()
-        logging.info("Módulo de compresión y corte validado correctamente")
+        # Enviar el comando "dcc\n" para iniciar el diagnóstico
+        try:
+            self.arduino.write(b'dcc\n')
+            logging.info("Comando 'dcc' enviado al Arduino")
+        except Exception as e:
+            logging.error(f"Error al enviar comando al Arduino: {e}")
+            dialog = BaseUI.crear_alerta(self, "Error", "No se pudo enviar el comando al Arduino.")
+            dialog.exec_()
+            return
+
+        # Crear diálogo para mostrar el estado del diagnóstico
+        dialog = BaseUI.crear_alerta(self, "Verificando Módulo de Compresión y Corte", "Esperando respuesta del Arduino...")
+        dialog.setModal(True)
+
+        def read_serial():
+            try:
+                response = self.arduino.readline().decode('utf-8').strip()
+                if response:
+                    if response == "RSwitches":
+                        dialog.layout().itemAt(0).widget().setText("Switches: Correcto")
+                    elif response == "ESwitches":
+                        dialog.layout().itemAt(0).widget().setText("Switches: Error")
+                        QTimer.singleShot(2000, dialog.accept)
+                        return
+                    elif response == "RMotores":
+                        dialog.layout().itemAt(0).widget().setText("Motores: Correcto")
+                    elif response == "EMotores":
+                        dialog.layout().itemAt(0).widget().setText("Motores: Error")
+                        QTimer.singleShot(2000, dialog.accept)
+                        return
+                    elif response == "RIR":
+                        dialog.layout().itemAt(0).widget().setText("Sensor IR: Correcto")
+                        QTimer.singleShot(2000, dialog.accept)
+                        return
+                    elif response == "EIR":
+                        dialog.layout().itemAt(0).widget().setText("Sensor IR: Error")
+                        QTimer.singleShot(2000, dialog.accept)
+                        return
+                    else:
+                        dialog.layout().itemAt(0).widget().setText(f"Respuesta desconocida: {response}")
+
+                # Continuar leyendo después de 500 ms
+                QTimer.singleShot(500, read_serial)
+            except Exception as e:
+                logging.error(f"Error al leer respuesta del Arduino: {e}")
+                dialog.layout().itemAt(0).widget().setText("Error de comunicación.")
+                QTimer.singleShot(2000, dialog.accept)
+
+        read_serial()
         dialog.exec_()
 
     def coccion(self):
@@ -85,3 +137,9 @@ class PantallaDiagnostico(QWidget):
 
     def regresar(self):
         self.parent.setCurrentWidget(self.parent.pantalla_principal)
+
+    def close_serial(self):
+        """Cierra la conexión serial."""
+        if self.arduino:
+            self.arduino.close()
+            logging.info("Conexión serial cerrada.")
