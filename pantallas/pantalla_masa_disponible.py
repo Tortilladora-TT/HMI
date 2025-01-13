@@ -2,12 +2,19 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QGridLayout
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
 from utils.base_ui import BaseUI
+import RPi.GPIO as GPIO
+import sys
+import time
+from libraries.hx711py.hx711 import HX711
+#sys.path.append("libraries/hx711py")
+#from hx711 import HX711  # Importamos la librería HX711
 
 class PantallaMasaDisponible(QWidget):
     def __init__(self, parent):
         super().__init__()
         self.parent = parent
         self.tortillas_calculadas = 0  # Inicializamos el número de tortillas calculadas
+        self.hx = None  # Instancia de la báscula
         self.init_ui()
 
     def init_ui(self):
@@ -65,25 +72,44 @@ class PantallaMasaDisponible(QWidget):
         self.setLayout(layout_principal)
 
     def reset_pantalla(self):
-        """Restaura el estado inicial de la pantalla."""
+        """Restaura el estado inicial de la pantalla y limpia los GPIO."""
         self.label_bascula.setText("Peso Báscula: 0.0 kg")
         self.label_tortillas.setText("Tortillas Calculadas: 0")
         self.btn_tarar.setEnabled(True)
         self.btn_calcular.setEnabled(False)
         self.btn_iniciar.setEnabled(False)
+        if self.hx:
+            GPIO.cleanup()  # Limpia los GPIO
 
     def tarar_bascula(self):
-        """Simula el tarado de la báscula."""
-        self.btn_tarar.setEnabled(False)
-        self.btn_calcular.setEnabled(True)
+        """Configura y realiza la tara de la báscula."""
+        try:
+            self.hx = HX711(5, 6)  # Pines DT y SCK
+            self.hx.set_reference_unit(283.29)  # Unidad de referencia
+            self.hx.reset()
+            self.hx.tare()  # Realiza la tara
+            self.label_bascula.setText("Báscula tarada. Coloca la masa.")
+            self.btn_tarar.setEnabled(False)
+            self.btn_calcular.setEnabled(True)
+        except Exception as e:
+            self.label_bascula.setText("Error al tarar la báscula.")
+            print(f"Error: {e}")
 
     def calcular_tortillas(self):
-        """Simula el cálculo de tortillas basado en el peso."""
-        self.label_bascula.setText("Peso Báscula: 2.0 kg")
-        self.tortillas_calculadas = 60  # Simulación
-        self.label_tortillas.setText(f"Tortillas Calculadas: {self.tortillas_calculadas}")
-        self.btn_calcular.setEnabled(False)
-        self.btn_iniciar.setEnabled(True)
+        """Obtiene el peso de la báscula y calcula las tortillas."""
+        try:
+            peso = self.hx.get_weight(5) / 1000  # Obtener peso en kg
+            peso = round(peso, 3)  # Redondear a 3 decimales
+            self.label_bascula.setText(f"Peso Báscula: {peso} kg")
+            self.tortillas_calculadas = int(peso * 30)  # Simulación: 1 kg = 30 tortillas
+            self.label_tortillas.setText(f"Tortillas Calculadas: {self.tortillas_calculadas}")
+            self.btn_calcular.setEnabled(False)
+            self.btn_iniciar.setEnabled(True)
+            self.hx.power_down()
+            self.hx.power_up()
+        except Exception as e:
+            self.label_bascula.setText("Error al calcular el peso.")
+            print(f"Error: {e}")
 
     def iniciar(self):
         """Envía el número de tortillas calculadas a pantalla_operacion y cambia de pantalla."""
@@ -91,6 +117,6 @@ class PantallaMasaDisponible(QWidget):
         self.parent.cambiar_pantalla(self.parent.pantalla_operacion)
 
     def regresar(self):
-        """Regresa a la pantalla anterior y reinicia el estado."""
+        """Regresa a la pantalla anterior, limpia los GPIO y reinicia el estado."""
         self.reset_pantalla()
         self.parent.cambiar_pantalla(self.parent.pantalla_automatico)
