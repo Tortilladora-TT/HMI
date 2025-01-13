@@ -21,7 +21,7 @@ class PantallaMasaDisponible(QWidget):
 
         # Subtítulo
         layout_principal.addWidget(
-            BaseUI.crear_subtitulo("Presiona tarar y luego pesa la masa en la báscula.")
+            BaseUI.crear_subtitulo("Presiona el botón tarar y luego pesa la masa en la báscula.")
         )
 
         # Labels dinámicos
