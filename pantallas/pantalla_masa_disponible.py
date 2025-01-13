@@ -19,16 +19,23 @@ class PantallaMasaDisponible(QWidget):
         # Encabezado
         layout_principal.addWidget(BaseUI.crear_encabezado("Masa Disponible"))
 
+        # Subtítulo
+        layout_principal.addWidget(
+            BaseUI.crear_subtitulo("Presiona tarar y luego pesa la masa en la báscula.")
+        )
+
         # Labels dinámicos
         labels_layout = QVBoxLayout()
         self.label_bascula = QLabel("Peso Báscula: 0.0 kg")
         self.label_bascula.setFont(QFont("Arial", 18))
         self.label_bascula.setAlignment(Qt.AlignCenter)
+        self.label_bascula.setStyleSheet("border: 2px solid black; padding: 10px;")
         labels_layout.addWidget(self.label_bascula)
 
         self.label_tortillas = QLabel("Tortillas Calculadas: 0")
         self.label_tortillas.setFont(QFont("Arial", 18))
         self.label_tortillas.setAlignment(Qt.AlignCenter)
+        self.label_tortillas.setStyleSheet("border: 2px solid black; padding: 10px;")
         labels_layout.addWidget(self.label_tortillas)
 
         layout_principal.addLayout(labels_layout)
