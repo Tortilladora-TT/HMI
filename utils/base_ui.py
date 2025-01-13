@@ -1,4 +1,3 @@
-# base_ui.py
 from PyQt5.QtWidgets import QLabel, QPushButton, QDialog, QVBoxLayout
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt

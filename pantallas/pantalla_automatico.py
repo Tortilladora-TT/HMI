@@ -3,22 +3,16 @@ from PyQt5.QtCore import Qt
 from utils.base_ui import BaseUI
 
 class PantallaAutomatico(QWidget):
-    def __init__(self, parent, width, height):
+    def __init__(self, parent):
         super().__init__()
         self.parent = parent
-        self.width = width
-        self.height = height
         self.init_ui()
 
     def init_ui(self):
+        # Configuración del layout principal
         layout = QVBoxLayout()
-        layout.setContentsMargins(
-            int(self.width * 0.05),
-            int(self.height * 0.05),
-            int(self.width * 0.05),
-            int(self.height * 0.05)
-        )
-        layout.setSpacing(int(self.height * 0.02))
+        layout.setContentsMargins(40, 40, 40, 40)  # Márgenes ajustados a 40px
+        layout.setSpacing(20)
 
         # Título
         layout.addWidget(BaseUI.crear_encabezado("Modo Automático"))
@@ -52,7 +46,6 @@ class PantallaAutomatico(QWidget):
 
     def masa_disponible(self):
         self.parent.setCurrentWidget(self.parent.pantalla_masa_disponible)
-        self.parent.pantalla_masa_disponible.reset_pantalla()
 
     def tortillas_deseadas(self):
         self.parent.setCurrentWidget(self.parent.pantalla_tortillas_deseadas)
