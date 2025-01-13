@@ -5,37 +5,44 @@ from utils.base_ui import BaseUI
 
 
 class PantallaOperacion(QWidget):
-    def __init__(self, parent):
+    def __init__(self, parent, width, height):
         super().__init__()
         self.parent = parent
         self.total_tortillas = 0  # Total de tortillas deseadas
         self.tortillas_producidas = 0  # Tortillas producidas
         self.proceso_pausado = False
+        self.parent = parent
+        self.width = width
+        self.height = height
         self.timer = QTimer()  # Temporizador para simular la producción
         self.timer.timeout.connect(self.incrementar_produccion)  # Llama a incrementar_produccion cada vez que se activa
         self.init_ui()
 
     def init_ui(self):
-        # Layout principal
-        layout_principal = QVBoxLayout()
-        layout_principal.setContentsMargins(40, 40, 40, 40)
-        layout_principal.setSpacing(20)
+        layout = QVBoxLayout()
+        layout.setContentsMargins(
+            int(self.width * 0.05),
+            int(self.height * 0.05),
+            int(self.width * 0.05),
+            int(self.height * 0.05)
+        )
+        layout.setSpacing(int(self.height * 0.02))
 
         # Encabezado
-        layout_principal.addWidget(BaseUI.crear_encabezado("Operación en Proceso"))
+        layout.addWidget(BaseUI.crear_encabezado("Operación en Proceso"))
 
         # Indicador de progreso
         self.tortillas_label = QLabel("Tortillas producidas: 0 / 0")
         self.tortillas_label.setFont(QFont("Arial", 18))
         self.tortillas_label.setAlignment(Qt.AlignCenter)
-        layout_principal.addWidget(self.tortillas_label)
+        layout.addWidget(self.tortillas_label)
 
         # Barra de progreso personalizada
         self.progress_bar = QProgressBar()
         self.progress_bar.setValue(0)
         self.progress_bar.setMaximum(100)
         self.progress_bar.setTextVisible(False)  # Eliminar texto del porcentaje
-        layout_principal.addWidget(self.progress_bar)
+        layout.addWidget(self.progress_bar)
 
         # Botones de control
         self.botones_layout = QHBoxLayout()
@@ -47,9 +54,9 @@ class PantallaOperacion(QWidget):
         self.btn_cancelar = BaseUI.crear_boton("Cancelar", self.cancelar)
         self.botones_layout.addWidget(self.btn_cancelar)
 
-        layout_principal.addLayout(self.botones_layout)
+        layout.addLayout(self.botones_layout)
 
-        self.setLayout(layout_principal)
+        self.setLayout(layout)
 
     def actualizar_tortillas(self, cantidad):
         """

@@ -5,20 +5,26 @@ from utils.base_ui import BaseUI
 
 
 class PantallaTortillasDeseadas(QWidget):
-    def __init__(self, parent):
+    def __init__(self, parent, width, height):
         super().__init__()
         self.parent = parent
+        self.width = width
+        self.height = height
         self.init_ui()
 
     def init_ui(self):
-        # Configuración del layout principal
-        layout_principal = QVBoxLayout()
-        layout_principal.setContentsMargins(40, 40, 40, 40)
-        layout_principal.setSpacing(20)
+        layout = QVBoxLayout()
+        layout.setContentsMargins(
+            int(self.width * 0.05),
+            int(self.height * 0.05),
+            int(self.width * 0.05),
+            int(self.height * 0.05)
+        )
+        layout.setSpacing(int(self.height * 0.02))
 
         # Encabezado
-        layout_principal.addWidget(BaseUI.crear_encabezado("Tortillas Deseadas"))
-        layout_principal.addWidget(
+        layout.addWidget(BaseUI.crear_encabezado("Tortillas Deseadas"))
+        layout.addWidget(
             BaseUI.crear_subtitulo(
                 "Instrucciones:\n"
                 "1. Ingresa el número de tortillas.\n"
@@ -75,9 +81,9 @@ class PantallaTortillasDeseadas(QWidget):
         botones_layout.addWidget(btn_regresar)
 
         cuerpo_layout.addLayout(botones_layout)
-        layout_principal.addLayout(cuerpo_layout)
+        layout.addLayout(cuerpo_layout)
 
-        self.setLayout(layout_principal)
+        self.setLayout(layout)
 
     def add_digit(self, digit):
         """Añade un dígito al valor actual."""

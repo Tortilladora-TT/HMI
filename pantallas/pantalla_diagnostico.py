@@ -4,16 +4,22 @@ from utils.base_ui import BaseUI
 import logging
 
 class PantallaDiagnostico(QWidget):
-    def __init__(self, parent):
+    def __init__(self, parent, width, height):
         super().__init__()
         self.parent = parent
+        self.width = width
+        self.height = height
         self.init_ui()
 
     def init_ui(self):
-        # Configuración del layout principal
         layout = QVBoxLayout()
-        layout.setContentsMargins(40, 40, 40, 40)  # Márgenes ajustados
-        layout.setSpacing(20)
+        layout.setContentsMargins(
+            int(self.width * 0.05),
+            int(self.height * 0.05),
+            int(self.width * 0.05),
+            int(self.height * 0.05)
+        )
+        layout.setSpacing(int(self.height * 0.02))
 
         # Título
         layout.addWidget(BaseUI.crear_encabezado("Modo Diagnóstico"))
