@@ -79,6 +79,12 @@ class PantallaTortillasDeseadas(QWidget):
 
         self.setLayout(layout_principal)
 
+    def reset_pantalla(self):
+        """Reinicia el valor de las tortillas y desactiva el botón de inicio."""
+        self.input_value.setText("0")
+        self.btn_iniciar.setEnabled(False)
+        
+
     def add_digit(self, digit):
         """Añade un dígito al valor actual."""
         current = self.input_value.text()
