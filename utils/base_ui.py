@@ -32,6 +32,16 @@ class BaseUI:
         return boton
 
     @staticmethod
+    def crear_boton_numerico(texto, funcion):
+        """Crea un QPushButton estilizado para teclas numéricas."""
+        boton = QPushButton(texto)
+        boton.setFont(QFont("Arial", 20))
+        boton.setFixedHeight(60)
+        boton.setFixedWidth(60)
+        boton.clicked.connect(funcion)
+        return boton
+    
+    @staticmethod
     def crear_alerta(parent, titulo, mensaje, ancho=400, alto=200):
         """Crea un QDialog estilizado para mostrar alertas."""
         dialog = QDialog(parent)
