@@ -9,7 +9,7 @@ class PantallaDiagnostico(QWidget):
         super().__init__()
         self.parent = parent
         # Instancias de SerialManager para diferentes módulos
-        self.arduino_compresion = SerialManager(port='/dev/ttyUSB1', baudrate=9600)
+        self.arduino_compresion = SerialManager(port='/dev/ttyUSB0', baudrate=9600)
         self.arduino_coccion = SerialManager(port='/dev/AMA0', baudrate=9600)
         self.init_ui()
 

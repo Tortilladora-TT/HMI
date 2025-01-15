@@ -1,9 +1,11 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QGridLayout
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt, QTimer
+from utils.serial_manager import SerialManager
 from utils.base_ui import BaseUI
 import RPi.GPIO as GPIO
 from libraries.hx711py.hx711 import HX711
+import logging
 
 class PantallaMasaDisponible(QWidget):
     def __init__(self, parent):
@@ -13,6 +15,7 @@ class PantallaMasaDisponible(QWidget):
         self.hx = None  # Instancia de la báscula
         self.peso_actual = 0.0  # Peso inicial
         self.timer = QTimer()  # Temporizador para actualizar el peso
+        self.arduino_compresion = SerialManager(port='/dev/ttyUSB0', baudrate=9600)
         self.init_ui()
 
     def init_ui(self):
@@ -133,6 +136,16 @@ class PantallaMasaDisponible(QWidget):
 
     def iniciar(self):
         """Envía el número de tortillas calculadas a pantalla_operacion y cambia de pantalla."""
+        logging.info("Iniciando compresión y corte")
+        self.arduino_compresion.connect()
+
+        if not self.arduino_compresion.connection:
+            dialog = BaseUI.crear_alerta(self, "Error", "No se pudo conectar al módulo de compresión y corte.")
+            dialog.exec_()
+            return
+
+        # Enviar el comando para iniciar el diagnóstico
+        self.arduino_compresion.send_command("Inicio")
         self.parent.pantalla_operacion.actualizar_tortillas(self.tortillas_calculadas)
         self.parent.cambiar_pantalla(self.parent.pantalla_operacion)
 
