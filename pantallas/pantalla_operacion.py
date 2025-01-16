@@ -103,7 +103,7 @@ class PantallaOperacion(QWidget):
                     
                     if self.serial_nano.connection:
                         time.sleep(0.1)  # Breve pausa antes de enviar el comando
-                        self.serial_nano.send_command("Iniciar")
+                        self.serial_nano.send_command("Inicio")
                         logging.info("Comando 'Iniciar' enviado al Nano.")
                         
                         response_nano = self.serial_nano.read_response()
