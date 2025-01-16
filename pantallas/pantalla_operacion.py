@@ -100,7 +100,7 @@ class PantallaOperacion(QWidget):
 
                 if response_pico == "Testal":
                     logging.info("Respuesta 'Testal' recibida de la Pico.")
-                    self.serial_nano.send_command("Iniciar")
+                    self.serial_nano.send_command("Iniciar\n")
                     response_nano = self.serial_nano.read_response()
 
                     if response_nano == "Tortilla":
