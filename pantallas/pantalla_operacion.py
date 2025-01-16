@@ -103,7 +103,7 @@ class PantallaOperacion(QWidget):
                     
                     if self.serial_nano.connection:
                         time.sleep(0.1)  # Breve pausa antes de enviar el comando
-                        self.serial_nano.send_command("Inicio")
+                        self.serial_nano.send_command("Iniciar")
                         logging.info("Comando 'Iniciar' enviado al Nano.")
                         
                         response_nano = self.serial_nano.read_response()
@@ -116,13 +116,16 @@ class PantallaOperacion(QWidget):
                             )
                             self.progress_bar.setValue(progreso)
                             
+                            # Enviar comando para detener el motor
+                            self.serial_pico.send_command("Stop")
+                            logging.info("Comando 'Stop' enviado a la Pico.")
+                            
                             QTimer.singleShot(5000, self.control_produccion)  # Reintentar después de 5 segundos
                         else:
                             logging.warning(f"Respuesta inesperada del Nano: {response_nano}")
                     else:
                         logging.error("Conexión con el Nano no disponible.")
-                else:
-                    logging.warning(f"Respuesta inesperada de la Pico: {response_pico}")
+
             else:
                 self.finalizar_proceso()
         except Exception as e:
