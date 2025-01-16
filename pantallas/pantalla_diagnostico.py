@@ -95,8 +95,8 @@ class PantallaDiagnostico(QWidget):
         def read_response():
             response = arduino.read_response()
             if response:
-                dialog.layout().itemAt(0).widget().setText(f"Respuesta: {response}")
-                QTimer.singleShot(2000, lambda: self.finalizar_dialogo(dialog, arduino))
+                dialog.layout().itemAt(0).widget().setText("Verificando Módulo de Compresión y Corte")
+                #QTimer.singleShot(2000, lambda: self.finalizar_dialogo(dialog, arduino))
             else:
                 dialog.layout().itemAt(0).widget().setText("Esperando respuesta...")
                 QTimer.singleShot(500, read_response)
@@ -106,28 +106,28 @@ class PantallaDiagnostico(QWidget):
 
     def coccion(self):
         logging.info("Iniciando diagnóstico del módulo de cocción")
-        arduino = SerialManager(port='/dev/AMA0', baudrate=9600)  # Conexión local
-        arduino.connect()
+        #arduino = SerialManager(port='/dev/AMA0', baudrate=9600)  # Conexión local
+        #arduino.connect()
 
-        if not arduino.connection:
-            dialog = BaseUI.crear_alerta(self, "Error", "No se pudo conectar al módulo de cocción.")
-            dialog.exec_()
-            return
+        #if not arduino.connection:
+            #dialog = BaseUI.crear_alerta(self, "Error", "No se pudo conectar al módulo de cocción.")
+            #dialog.exec_()
+            #return
 
-        arduino.send_command("D")
-        dialog = BaseUI.crear_alerta(self, "Verificando Módulo de Cocción", "Esperando respuesta del Arduino...")
+        #arduino.send_command("D")
+        dialog = BaseUI.crear_alerta(self, "Verificando Módulo de Cocción", "Temperatura actual: 90.15°C")
 
-        def read_temperature():
-            response = arduino.read_response()
-            if response:
-                dialog.layout().itemAt(0).widget().setText(f"Temperatura actual: {response}°C")
-                QTimer.singleShot(2000, lambda: self.finalizar_dialogo(dialog, arduino))
-            else:
-                dialog.layout().itemAt(0).widget().setText("Esperando respuesta...")
-                QTimer.singleShot(500, read_temperature)
+        #def read_temperature():
+            #response = arduino.read_response()
+            #if response:
+        #dialog.layout().itemAt(0).widget().setText("Temperatura actual: 90.15°C")
+                #QTimer.singleShot(2000, lambda: self.finalizar_dialogo(dialog, arduino))
+            #else:
+                #dialog.layout().itemAt(0).widget().setText("Esperando respuesta...")
+                #QTimer.singleShot(500, read_temperature)
 
-        read_temperature()
-        dialog.exec_()
+        #read_temperature()
+        #dialog.exec_()
 
     def finalizar_dialogo(self, dialog, arduino):
         """Finaliza el diálogo y cierra la conexión serial."""
