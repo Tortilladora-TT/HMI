@@ -14,6 +14,7 @@ class PantallaTortillasDeseadas(QWidget):
         self.peso_actual = 0.0  # Peso inicial
         self.tortillas_disponibles = 0  # Tortillas posibles con la masa actual
         self.serial_pico = SerialManager(port='/dev/ttyUSB0', baudrate=9600)  # Configuración del puerto serial
+        self.timer = QTimer()  # Inicialización del temporizador
         self.init_ui()
 
     def init_ui(self):
@@ -149,7 +150,8 @@ class PantallaTortillasDeseadas(QWidget):
 
     def stop_peso_update(self):
         """Detiene la actualización del peso."""
-        self.timer.stop()
+        if self.timer.isActive():
+            self.timer.stop()
 
     def update_peso(self):
         """Actualiza el peso de la báscula y calcula las tortillas posibles."""
