@@ -115,8 +115,8 @@ class PantallaDiagnostico(QWidget):
             #return
 
         #arduino.send_command("D")
-        dialog = BaseUI.crear_alerta(self, "Verificando Módulo de Cocción", "Temperatura actual: 90.15°C")
-        dialog.layout().itemAt(0).widget().setText("Verificando Módulo de Compresión y Corte")
+        #dialog = BaseUI.crear_alerta(self, "Verificando Módulo de Cocción", "Temperatura actual: 90.15°C")
+        #dialog.layout().itemAt(0).widget().setText("Verificando Módulo de Compresión y Corte")
         #def read_temperature():
             #response = arduino.read_response()
             #if response:
@@ -128,6 +128,9 @@ class PantallaDiagnostico(QWidget):
 
         #read_temperature()
         #dialog.exec_()
+        # Crear y mostrar el diálogo
+        dialog = BaseUI.crear_alerta(self, "Verificando Módulo de Cocción", "Verificando módulo de cocción...")
+        dialog.exec_()
 
     def finalizar_dialogo(self, dialog, arduino):
         """Finaliza el diálogo y cierra la conexión serial."""
