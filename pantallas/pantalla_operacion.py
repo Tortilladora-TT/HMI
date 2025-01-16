@@ -13,12 +13,10 @@ class PantallaOperacion(QWidget):
         self.parent = parent
         self.total_tortillas = 0  # Total de tortillas deseadas
         self.tortillas_producidas = 0  # Tortillas producidas
-        self.proceso_pausado = False
-        self.proceso_iniciado = False  # El proceso no ha comenzado
-        self.timer = QTimer()  # Temporizador para manejar el proceso
-        self.timer.timeout.connect(self.ciclo_produccion)  # Llama a ciclo_produccion
-        self.serial_pico = SerialManager(port='/dev/USB0', baudrate=9600)
-        self.serial_nano = SerialManager(port='/dev/USB1', baudrate=9600)
+        self.timer = QTimer()  # Temporizador para actualizar la barra de progreso
+        self.timer.timeout.connect(self.control_produccion)
+        self.serial_pico = SerialManager(port='/dev/ttyUSB0', baudrate=9600)
+        self.serial_nano = SerialManager(port='/dev/ttyUSB1', baudrate=9600)
         self.init_ui()
 
     def init_ui(self):
@@ -40,15 +38,14 @@ class PantallaOperacion(QWidget):
         self.progress_bar = QProgressBar()
         self.progress_bar.setValue(0)
         self.progress_bar.setMaximum(100)
-        self.progress_bar.setTextVisible(False)
         layout_principal.addWidget(self.progress_bar)
 
         # Botones de control
         self.botones_layout = QHBoxLayout()
         self.botones_layout.setSpacing(20)
 
-        self.btn_iniciar_pausar = BaseUI.crear_boton("Iniciar", self.toggle_iniciar_pausar)
-        self.botones_layout.addWidget(self.btn_iniciar_pausar)
+        self.btn_iniciar = BaseUI.crear_boton("Iniciar", self.iniciar_produccion)
+        self.botones_layout.addWidget(self.btn_iniciar)
 
         self.btn_cancelar = BaseUI.crear_boton("Cancelar", self.cancelar)
         self.botones_layout.addWidget(self.btn_cancelar)
@@ -65,92 +62,83 @@ class PantallaOperacion(QWidget):
         self.tortillas_producidas = 0
         self.tortillas_label.setText(f"Tortillas producidas: 0 / {self.total_tortillas}")
         self.progress_bar.setValue(0)
-        self.proceso_iniciado = False
-        self.proceso_pausado = False
-        self.btn_iniciar_pausar.setText("Iniciar")
+        self.btn_iniciar.setEnabled(True)  # Rehabilitar el botón de iniciar
         self.btn_cancelar.setText("Cancelar")
-        self.btn_cancelar.clicked.disconnect()
-        self.btn_cancelar.clicked.connect(self.cancelar)
 
-    def ciclo_produccion(self):
+    def iniciar_produccion(self):
         """
-        Controla el ciclo de producción:
-        - Interacción entre la Pico y el Nano.
-        - Incrementa el contador al recibir los datos correctos.
+        Inicia el ciclo de producción interactuando con los microcontroladores.
         """
-        if self.proceso_pausado:
-            return
-
+        self.btn_iniciar.setEnabled(False)  # Inhabilitar el botón de inicio
         try:
-            if not self.serial_pico.connection:
-                self.serial_pico.connect()
-            if not self.serial_nano.connection:
-                self.serial_nano.connect()
+            self.serial_pico.connect()
+            self.serial_nano.connect()
 
-            # Enviar "ad" a la Pico para iniciar el ciclo
-            logging.info("Enviando 'ad' a la Pico.")
-            self.serial_pico.send_command("ad")
-            logging.info("Esperando 'Testal' de la Pico.")
-            response_pico = self.serial_pico.read_response(timeout=10)
-            if response_pico == "Testal":
-                logging.info("'Testal' recibido, enviando 'Iniciar' al Nano.")
-                self.serial_nano.send_command("Iniciar")
-                response_nano = self.serial_nano.read_response(timeout=10)
+            if not self.serial_pico.connection or not self.serial_nano.connection:
+                dialog = BaseUI.crear_alerta(
+                    self, "Error", "No se pudo conectar con uno o más microcontroladores."
+                )
+                dialog.exec_()
+                return
 
-                if response_nano == "Tortilla":
-                    self.tortillas_producidas += 1
-                    progreso = int((self.tortillas_producidas / self.total_tortillas) * 100)
-                    self.tortillas_label.setText(
-                        f"Tortillas producidas: {self.tortillas_producidas} / {self.total_tortillas}"
-                    )
-                    self.progress_bar.setValue(progreso)
-
-                    if self.tortillas_producidas >= self.total_tortillas:
-                        self.finalizar_proceso()
-                    else:
-                        logging.info("Esperando 5 segundos antes de iniciar el siguiente ciclo.")
-                        time.sleep(5)
-
+            logging.info("Iniciando ciclo de producción.")
+            self.timer.start(1000)  # Actualizar cada segundo
         except Exception as e:
-            logging.error(f"Error durante el ciclo de producción: {e}")
+            logging.error(f"Error al iniciar la producción: {e}")
+            dialog = BaseUI.crear_alerta(self, "Error", f"Ocurrió un error: {e}")
+            dialog.exec_()
 
-    def toggle_iniciar_pausar(self):
+    def control_produccion(self):
         """
-        Maneja la lógica del botón "Iniciar/Pausar".
+        Controla la interacción entre la Pico y el Nano.
         """
-        if not self.proceso_iniciado:  # Estado inicial: Iniciar
-            self.proceso_iniciado = True
-            self.proceso_pausado = False
-            self.btn_iniciar_pausar.setText("Pausar")
-            self.timer.start(1000)
-            logging.info("Proceso iniciado.")
-        else:
-            if self.proceso_pausado:  # Reanudar
-                self.proceso_pausado = False
-                self.btn_iniciar_pausar.setText("Pausar")
-                logging.info("Proceso reanudado.")
-            else:  # Pausar
-                self.proceso_pausado = True
-                self.btn_iniciar_pausar.setText("Reanudar")
-                logging.info("Proceso pausado.")
+        try:
+            if self.tortillas_producidas < self.total_tortillas:
+                # Enviar comando a la Pico
+                self.serial_pico.send_command("ad")
+                response_pico = self.serial_pico.read_response()
+
+                if response_pico == "Testal":
+                    logging.info("Respuesta 'Testal' recibida de la Pico.")
+                    self.serial_nano.send_command("Iniciar")
+                    response_nano = self.serial_nano.read_response()
+
+                    if response_nano == "Tortilla":
+                        logging.info("Respuesta 'Tortilla' recibida del Nano.")
+                        self.tortillas_producidas += 1
+                        progreso = int(
+                            (self.tortillas_producidas / self.total_tortillas) * 100
+                        )
+                        self.tortillas_label.setText(
+                            f"Tortillas producidas: {self.tortillas_producidas} / {self.total_tortillas}"
+                        )
+                        self.progress_bar.setValue(progreso)
+                        time.sleep(5)  # Esperar antes del próximo ciclo
+                else:
+                    logging.warning(f"Respuesta inesperada de la Pico: {response_pico}")
+            else:
+                self.finalizar_proceso()
+        except Exception as e:
+            logging.error(f"Error durante ciclo de producción: {e}")
+            dialog = BaseUI.crear_alerta(self, "Error", f"Ocurrió un error: {e}")
+            dialog.exec_()
 
     def finalizar_proceso(self):
         """
         Cambia la pantalla a modo 'Proceso terminado' y actualiza los botones.
         """
-        self.timer.stop()
+        self.timer.stop()  # Detener el temporizador
         self.tortillas_label.setText("Proceso terminado")
         self.progress_bar.setValue(100)
         self.btn_cancelar.setText("Finalizar")
         self.btn_cancelar.clicked.disconnect()
         self.btn_cancelar.clicked.connect(self.finalizar)
-        self.btn_iniciar_pausar.setEnabled(False)
 
     def cancelar(self):
         """
         Cancela el proceso y regresa al menú principal.
         """
-        self.timer.stop()
+        self.timer.stop()  # Detener el temporizador
         self.serial_pico.send_command("Alto")
         self.serial_nano.send_command("Alto")
         self.parent.cambiar_pantalla(self.parent.pantalla_principal)
