@@ -114,6 +114,8 @@ class PantallaOperacion(QWidget):
                         )
                         self.progress_bar.setValue(progreso)
                         time.sleep(5)  # Esperar antes del próximo ciclo
+                    else:
+                        logging.warning(f"Respuesta inesperada del Nano: {response_nano}")
                 else:
                     logging.warning(f"Respuesta inesperada de la Pico: {response_pico}")
             else:
