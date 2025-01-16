@@ -116,7 +116,7 @@ class PantallaDiagnostico(QWidget):
 
         #arduino.send_command("D")
         dialog = BaseUI.crear_alerta(self, "Verificando Módulo de Cocción", "Temperatura actual: 90.15°C")
-
+        dialog.layout().itemAt(0).widget().setText("Verificando Módulo de Compresión y Corte")
         #def read_temperature():
             #response = arduino.read_response()
             #if response:
