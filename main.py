@@ -11,7 +11,6 @@ from pantallas.pantalla_tortillas_deseadas import PantallaTortillasDeseadas
 from pantallas.pantalla_operacion import PantallaOperacion
 from config import configurar_logs, cargar_estilos
 import logging
-from utils.serial_manager import SerialManager
 
 
 class MainApp(QStackedWidget):
@@ -23,10 +22,6 @@ class MainApp(QStackedWidget):
         # Configurar GPIO
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.GPIO_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-
-        # Inicializar conexiones seriales
-        self.serial_usb0 = SerialManager(port='/dev/USB0', baudrate=9600)
-        self.serial_usb1 = SerialManager(port='/dev/USB1', baudrate=9600)
 
         # Inicializar pantallas
         self.pantalla_masa_disponible = PantallaMasaDisponible(self)
@@ -61,23 +56,21 @@ class MainApp(QStackedWidget):
         except Exception as e:
             logging.error(f"Error al cambiar de pantalla: {e}")
 
-    def activar_paro_emergencia(self):
-        """Muestra un dialog para el paro de emergencia y envía comandos 'Alto' por serial."""
-        # Enviar el comando "Alto" a los puertos seriales
-        for serial_device in [self.serial_usb0, self.serial_usb1]:
-            try:
-                serial_device.connect()
-                if serial_device.connection:
-                    serial_device.send_command("Alto")
-                    logging.info(f"Comando 'Alto' enviado a {serial_device.port}.")
-                else:
-                    logging.warning(f"No se pudo conectar al puerto {serial_device.port}.")
-            except Exception as e:
-                logging.error(f"Error enviando comando 'Alto' a {serial_device.port}: {e}")
-            finally:
-                serial_device.disconnect()
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Escape:
+            logging.info("Aplicación cerrada por el usuario.")
+            respuesta = QMessageBox.question(
+                self,
+                "Confirmar salida",
+                "¿Está seguro de que desea salir?",
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No
+            )
+            if respuesta == QMessageBox.Yes:
+                self.close()
 
-        # Mostrar el diálogo de paro de emergencia
+    def activar_paro_emergencia(self):
+        """Muestra un dialog para el paro de emergencia."""
         dialog = QDialog(self)
         dialog.setWindowTitle("PARO DE EMERGENCIA")
         dialog.setModal(True)
@@ -94,7 +87,7 @@ class MainApp(QStackedWidget):
         layout.addWidget(label)
 
         dialog.setLayout(layout)
-        dialog.exec_()
+        dialog.exec_()  # Mostrar el dialog
 
     def monitor_paro_emergencia(self):
         """Monitoriza el estado del GPIO para activar el paro de emergencia."""
