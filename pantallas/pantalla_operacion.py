@@ -117,7 +117,7 @@ class PantallaOperacion(QWidget):
                             self.progress_bar.setValue(progreso)
                             
                             # Enviar comando para detener el motor
-                            self.serial_pico.send_command("Stop")
+                            self.serial_pico.send_command("Alto")
                             logging.info("Comando 'Stop' enviado a la Pico.")
                             
                             QTimer.singleShot(5000, self.control_produccion)  # Reintentar después de 5 segundos
