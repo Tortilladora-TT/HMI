@@ -100,22 +100,27 @@ class PantallaOperacion(QWidget):
 
                 if response_pico == "Testal":
                     logging.info("Respuesta 'Testal' recibida de la Pico.")
-                    self.serial_nano.send_command("Iniciar\n")
-                    response_nano = self.serial_nano.read_response()
-
-                    if response_nano == "Tortilla":
-                        logging.info("Respuesta 'Tortilla' recibida del Nano.")
-                        self.tortillas_producidas += 1
-                        progreso = int(
-                            (self.tortillas_producidas / self.total_tortillas) * 100
-                        )
-                        self.tortillas_label.setText(
-                            f"Tortillas producidas: {self.tortillas_producidas} / {self.total_tortillas}"
-                        )
-                        self.progress_bar.setValue(progreso)
-                        time.sleep(5)  # Esperar antes del próximo ciclo
+                    
+                    if self.serial_nano.connection:
+                        time.sleep(0.1)  # Breve pausa antes de enviar el comando
+                        self.serial_nano.send_command("Iniciar")
+                        logging.info("Comando 'Iniciar' enviado al Nano.")
+                        
+                        response_nano = self.serial_nano.read_response()
+                        if response_nano == "Tortilla":
+                            logging.info("Respuesta 'Tortilla' recibida del Nano.")
+                            self.tortillas_producidas += 1
+                            progreso = int((self.tortillas_producidas / self.total_tortillas) * 100)
+                            self.tortillas_label.setText(
+                                f"Tortillas producidas: {self.tortillas_producidas} / {self.total_tortillas}"
+                            )
+                            self.progress_bar.setValue(progreso)
+                            
+                            QTimer.singleShot(5000, self.control_produccion)  # Reintentar después de 5 segundos
+                        else:
+                            logging.warning(f"Respuesta inesperada del Nano: {response_nano}")
                     else:
-                        logging.warning(f"Respuesta inesperada del Nano: {response_nano}")
+                        logging.error("Conexión con el Nano no disponible.")
                 else:
                     logging.warning(f"Respuesta inesperada de la Pico: {response_pico}")
             else:
