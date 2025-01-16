@@ -73,7 +73,7 @@ class PantallaDiagnostico(QWidget):
                 else:
                     QTimer.singleShot(500, check_status)
             else:
-                dialog.layout().itemAt(0).widget().setText("Esperando respuesta...")
+                dialog.layout().itemAt(0).widget().setText("Verificando Módulo de Dosificación...")
                 QTimer.singleShot(500, check_status)
 
         check_status()

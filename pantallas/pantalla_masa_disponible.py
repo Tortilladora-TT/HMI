@@ -15,7 +15,7 @@ class PantallaMasaDisponible(QWidget):
         self.hx = None  # Instancia de la báscula
         self.peso_actual = 0.0  # Peso inicial
         self.timer = QTimer()  # Temporizador para actualizar el peso
-        self.arduino_compresion = SerialManager(port='/dev/ttyUSB0', baudrate=9600)
+        self.serial_pico = SerialManager(port='/dev/ttyUSB0', baudrate=9600)  # Configuración del puerto serial
         self.init_ui()
 
     def init_ui(self):
@@ -60,7 +60,7 @@ class PantallaMasaDisponible(QWidget):
         botones_layout.addWidget(self.btn_guardar, 0, 1)
 
         # Fila 2
-        self.btn_iniciar = BaseUI.crear_boton("Iniciar", self.iniciar)
+        self.btn_iniciar = BaseUI.crear_boton("Aceptar", self.iniciar)
         self.btn_iniciar.setEnabled(False)  # Inicia desactivado
         botones_layout.addWidget(self.btn_iniciar, 1, 0)
 
@@ -135,19 +135,27 @@ class PantallaMasaDisponible(QWidget):
             print(f"Error al guardar el peso: {e}")
 
     def iniciar(self):
-        """Envía el número de tortillas calculadas a pantalla_operacion y cambia de pantalla."""
-        logging.info("Iniciando compresión y corte")
-        self.arduino_compresion.connect()
+        """Envía el número de tortillas calculadas por serial y confirma el proceso."""
+        try:
+            tortillas = self.tortillas_calculadas
+            comando = f"pap {tortillas}"
+            logging.info(f"Enviando comando: {comando}")
+            self.serial_pico.connect()
 
-        if not self.arduino_compresion.connection:
-            dialog = BaseUI.crear_alerta(self, "Error", "No se pudo conectar al módulo de compresión y corte.")
+            if self.serial_pico.connection:
+                self.serial_pico.send_command(comando)
+                logging.info("Comando enviado correctamente.")
+                self.parent.cambiar_pantalla(self.parent.pantalla_operacion)
+                self.parent.pantalla_operacion.actualizar_tortillas(tortillas)
+            else:
+                dialog = BaseUI.crear_alerta(self, "Error", "No se pudo conectar al módulo.")
+                dialog.exec_()
+                return
+            
+        except Exception as e:
+            logging.error(f"Error al iniciar el proceso: {e}")
+            dialog = BaseUI.crear_alerta(self, "Error", "Ocurrió un error al iniciar el proceso.")
             dialog.exec_()
-            return
-
-        # Enviar el comando para iniciar el diagnóstico
-        self.arduino_compresion.send_command("Inicio")
-        self.parent.pantalla_operacion.actualizar_tortillas(self.tortillas_calculadas)
-        self.parent.cambiar_pantalla(self.parent.pantalla_operacion)
 
     def regresar(self):
         """Regresa a la pantalla anterior, limpia los recursos y reinicia el estado."""

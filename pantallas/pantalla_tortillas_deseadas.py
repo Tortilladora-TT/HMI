@@ -2,9 +2,10 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QGridLayout, QHBoxLayo
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt, QTimer
 from utils.base_ui import BaseUI
+from utils.serial_manager import SerialManager
 import RPi.GPIO as GPIO
 from libraries.hx711py.hx711 import HX711
-
+import logging
 class PantallaTortillasDeseadas(QWidget):
     def __init__(self, parent):
         super().__init__()
@@ -12,8 +13,8 @@ class PantallaTortillasDeseadas(QWidget):
         self.hx = None  # Instancia de la báscula
         self.peso_actual = 0.0  # Peso inicial
         self.tortillas_disponibles = 0  # Tortillas posibles con la masa actual
+        self.serial_pico = SerialManager(port='/dev/ttyUSB0', baudrate=9600)  # Configuración del puerto serial
         self.init_ui()
-        self.timer = QTimer()  # Temporizador para actualizar el peso
 
     def init_ui(self):
         # Configuración del layout principal
@@ -83,7 +84,7 @@ class PantallaTortillasDeseadas(QWidget):
         btn_guardar = BaseUI.crear_boton("Guardar", self.guardar)
         botones_layout.addWidget(btn_guardar)
 
-        self.btn_iniciar = BaseUI.crear_boton("Iniciar", self.iniciar)
+        self.btn_iniciar = BaseUI.crear_boton("Aceptar", self.iniciar)
         self.btn_iniciar.setEnabled(False)
         botones_layout.addWidget(self.btn_iniciar)
 
@@ -169,13 +170,30 @@ class PantallaTortillasDeseadas(QWidget):
             self.available_value.setStyleSheet("border: 2px solid black; padding: 10px; color: black;")
 
     def iniciar(self):
-        """Envía el valor ingresado a pantalla_operacion y cambia de pantalla."""
+        """Envía el número de tortillas ingresadas por serial y confirma el proceso."""
         try:
             tortillas = int(self.input_value.text())
-            self.parent.pantalla_operacion.actualizar_tortillas(tortillas)
-            self.parent.cambiar_pantalla(self.parent.pantalla_operacion)
+            comando = f"pap {tortillas}"
+            logging.info(f"Enviando comando: {comando}")
+            self.serial_pico.connect()
+
+            if self.serial_pico.connection:
+                self.serial_pico.send_command(comando)
+                logging.info("Comando enviado correctamente.")
+                self.parent.cambiar_pantalla(self.parent.pantalla_operacion)
+                self.parent.pantalla_operacion.actualizar_tortillas(tortillas)
+            else:
+                dialog = BaseUI.crear_alerta(self, "Error", "No se pudo conectar al módulo.")
+                dialog.exec_()
+                return
+
         except ValueError:
+            logging.error("Error al convertir el valor ingresado.")
             self.input_value.setText("ERROR")
+        except Exception as e:
+            logging.error(f"Error al iniciar el proceso: {e}")
+            dialog = BaseUI.crear_alerta(self, "Error", "Ocurrió un error al iniciar el proceso.")
+            dialog.exec_()
 
     def regresar(self):
         """Regresa a la pantalla de modo automático."""
